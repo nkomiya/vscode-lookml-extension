@@ -16,6 +16,10 @@
         "aliases": [
           "LookML Manifest"
         ],
+        "icon": {
+          "light": "./images/looker-favicon-16x16.png",
+          "dark": "./images/looker-favicon-16x16.png"
+        },
         "filenames": [
           "manifest.lkml"
         ],
