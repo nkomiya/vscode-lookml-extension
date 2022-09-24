@@ -1,0 +1,16 @@
+{
+    "name": "syntaxes",
+    "version": "0.0.1",
+    "scripts": {
+        "clean": "rimraf ../../dist/syntaxes",
+        "compile": "yarn clean && node compile.js && cpx 'lookml/*.json' ../../dist/syntaxes/lookml/"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "cpx": "^1.5.0",
+        "glob": "^8.0.3",
+        "js-yaml": "^4.1.0",
+        "rimraf": "^3.0.2"
+    },
+    "license": "MIT"
+}

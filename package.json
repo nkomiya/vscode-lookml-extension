@@ -1,0 +1,47 @@
+{
+  "name": "vscode-lookml-extension",
+  "displayName": "vscode-lookml-extension",
+  "description": "LookML Extension for developments with VSCode",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "lookml.manifest",
+        "aliases": [
+          "LookML Manifest"
+        ],
+        "filenames": [
+          "manifest.lkml"
+        ],
+        "configuration": "./dist/syntaxes/lookml/config.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "lookml.manifest",
+        "scopeName": "source.lookml.manifest",
+        "path": "./dist/syntaxes/lookml/manifest.json"
+      }
+    ]
+  },
+  "scripts": {
+    "compile:syntaxes": "yarn workspace syntaxes compile",
+    "compile": "yarn compile:syntaxes",
+    "watch": "tsc -b -w"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.71.0",
+    "@types/node": "16.x",
+    "typescript": "^4.7.4"
+  },
+  "workspaces": [
+    "packages/syntaxes"
+  ],
+  "private": true
+}

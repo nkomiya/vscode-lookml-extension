@@ -1,0 +1,8 @@
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+packages/syntaxes/**/*.json
+!package.json
+!config.json

@@ -1,0 +1,28 @@
+patterns:
+  - include: "#expression"
+
+repository:
+  expression:
+    patterns:
+      - include: "#letter"
+      - include: "#paren-expression"
+
+  letter:
+    name: keyword.letter.lookml
+    match: a|b|c
+
+  paren-expression:
+    name: expression.group.lookml
+    begin: \(
+    end: \)
+    beginCaptures:
+      0:
+        name: punctuation.paren.open.lookml
+    endCaptures:
+      0:
+        name: punctuation.paren.close.lookml
+    patterns:
+      - include: "#expression"
+
+
+scopeName: source.lookml
