@@ -37,6 +37,7 @@
   "scripts": {
     "compile:syntaxes": "yarn workspace syntaxes compile",
     "compile": "yarn compile:syntaxes",
+    "watch:syntaxes": "yarn workspace syntaxes watch",
     "watch": "tsc -b -w"
   },
   "devDependencies": {

@@ -3,10 +3,12 @@
     "version": "0.0.1",
     "scripts": {
         "clean": "rimraf ../../dist/syntaxes",
-        "compile": "yarn clean && node compile.js"
+        "compile": "yarn clean && node compile.js",
+        "watch": "node watch.js"
     },
     "dependencies": {},
     "devDependencies": {
+        "chokidar": "^3.5.3",
         "cpx": "^1.5.0",
         "glob": "^8.0.3",
         "js-yaml": "^4.1.0",
