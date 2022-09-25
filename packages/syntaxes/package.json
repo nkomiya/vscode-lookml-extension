@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "scripts": {
         "clean": "rimraf ../../dist/syntaxes",
-        "compile": "yarn clean && node compile.js && cpx 'lookml/*.json' ../../dist/syntaxes/lookml/"
+        "compile": "yarn clean && node compile.js"
     },
     "dependencies": {},
     "devDependencies": {

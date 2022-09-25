@@ -30,7 +30,7 @@
       {
         "language": "lookml.manifest",
         "scopeName": "source.lookml.manifest",
-        "path": "./dist/syntaxes/lookml/manifest.json"
+        "path": "./dist/syntaxes/lookml/lookml.manifest.json"
       }
     ]
   },
