@@ -1,28 +1,287 @@
+scopeName: source.lookml.manifest
+
 patterns:
-  - include: "#expression"
+  - include: "#comments"
+  - include: "#project_name"
+  - include: "#local_dependency"
+  - include: "#remote_dependency"
+  - include: "#constant"
+  - include: "#localization_settings"
+  - include: "#application"
+  - include: "#visualization"
+  - include: "#string"
 
 repository:
-  expression:
-    patterns:
-      - include: "#letter"
-      - include: "#paren-expression"
+  # ------------------------------
+  # project name
+  # ------------------------------
+  project_name:
+    match: \b(project_name)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.project_name.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
 
-  letter:
-    name: keyword.letter.lookml
-    match: a|b|c
-
-  paren-expression:
-    name: expression.group.lookml
-    begin: \(
-    end: \)
+  # ------------------------------
+  # local dependency
+  # ------------------------------
+  local_dependency:
+    begin: \b(local_dependency)\s*:\s*\{
     beginCaptures:
-      0:
-        name: punctuation.paren.open.lookml
-    endCaptures:
-      0:
-        name: punctuation.paren.close.lookml
+      1:
+        name: keyword.control.local_dependency.lookml.manifest
+    end: \}
     patterns:
-      - include: "#expression"
+      - include: "#comments"
+      - include: "#local_dependency_opt_string"
+      - include: "#override_constant"
+      - include: "#string"
 
+  local_dependency_opt_string:
+    match: \b(project)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.local_dependency_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
 
-scopeName: source.lookml
+  # ------------------------------
+  # remote dependency
+  # ------------------------------
+  remote_dependency:
+    begin: \b(remote_dependency)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.remote_dependency.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#remote_dependency_opt_string"
+      - include: "#override_constant"
+      - include: "#string"
+
+  remote_dependency_opt_string:
+    match: \b(url|ref)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.remote_dependency_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
+
+  # ------------------------------
+  # override constant
+  # ------------------------------
+  override_constant:
+    begin: \b(override_constant)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.override_constant.lookml.manifest
+      2:
+        name: meta.definition.ident.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#override_constant_opt_string"
+      - include: "#string"
+
+  override_constant_opt_string:
+    match: \b(value)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.override_constant_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
+
+  # ------------------------------
+  # constant
+  # ------------------------------
+  constant:
+    begin: \b(constant)\s*:\s*([A-Za-z0-9_]+)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.constant.lookml.manifest
+      2:
+        name: meta.definition.ident.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - match: \b(export)\s*:\s*([^\s"]*)
+        captures:
+          1:
+            name: keyword.control.constant.export.lookml.manifest
+          2:
+            patterns:
+              - name: support.constant.export.lookml.manifest
+                match: \b(none|override_optional|override_required)\b
+              - name: invalid.illegal.constant.export.lookml.manifest
+                match: "[^\\s]+"
+      - include: "#constant_opt_string"
+      - include: "#string"
+
+  constant_opt_string:
+    match: \b(value)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.constant_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
+
+  # ------------------------------
+  # localization settings
+  # ------------------------------
+  localization_settings:
+    begin: \b(localization_settings)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.constant.lookml.manifest
+      2:
+        name: meta.definition.ident.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#localization_level"
+      - include: "#default_locale"
+
+  localization_level:
+    match: \b(localization_level)\s*:\s*([^\s"]*)
+    captures:
+      1:
+        name: keyword.control.localization_level.lookml.manifest
+      2:
+        patterns:
+          - name: support.constant.localization_level.lookml.manifest
+            match: \b(strict|permissive)\b
+          - name: invalid.illegal.localization_level.lookml.manifest
+            match: "[^\\s]+"
+
+  default_locale:
+    match: \b(default_locale)\s*:\s*([^\s"]*)
+    captures:
+      1:
+        name: keyword.control.default_locale.lookml.manifest
+      2:
+        # supported locales
+        # https://cloud.google.com/looker/docs/supported-user-interface-languages#localizing_the_looker_user_interface
+        patterns:
+          - name: support.constant.default_locale.lookml.manifest
+            match: \b(en|cs_CZ|de_DE|es_ES|fr_FR|hi_IN|it_IT|ja_JP|ko_KR|lt_LT|nb_NO|nl_NL|pl_PL|pt_BR|pt_PT|ru_RU|sv_SE|th_TH|tr_TR|uk_UA|zh_CN|zh_TW)\b
+          - name: invalid.illegal.default_locale.lookml.manifest
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # application
+  # ------------------------------
+  application:
+    begin: \b(application)\s*:\s*([A-Za-z0-9_]+)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.application.lookml.manifest
+      2:
+        name: meta.definition.ident.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#application_opt_string"
+      - include: "#entitlements"
+      - include: "#string"
+
+  application_opt_string:
+    match: \b(label|url|file)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.application_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
+
+  entitlements:
+    begin: \b(entitlements)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.entitlements.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#entitlements_opt_yesno"
+      - include: "#entitlements_opt_string_array"
+
+  entitlements_opt_yesno:
+    match: \b(local_storage|navigation|new_window|use_form_submit|use_embeds|use_downloads|use_iframes|use_clipboard)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.entitlements_opt_yesno.lookml.manifest
+      2:
+        patterns:
+          - include: "#yes_no"
+
+  entitlements_opt_string_array:
+    begin: \b(new_window_external_urls|core_api_methods|external_api_urls|oauth2_urls|global_user_attributes|scoped_user_attributes)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.entitlements_opt_string_array.lookml.manifest
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#string"
+
+  # ------------------------------
+  # visualization
+  # ------------------------------
+  visualization:
+    begin: \b(visualization)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.visualization.lookml.manifest
+      2:
+        name: meta.definition.ident.lookml.manifest
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#visualization_opt_string"
+      - include: "#visualization_opt_string_array"
+      - include: "#string"
+
+  visualization_opt_string:
+    match: \b(id|url|label|sri_hash|file)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.visualization_opt_string.lookml.manifest
+      2:
+        name: invalid.illegal.string.lookml.manifest
+
+  visualization_opt_string_array:
+    begin: \b(dependencies)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.visualization_opt_string_array.lookml.manifest
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#string"
+
+  # ------------------------------
+  # comments
+  # ------------------------------
+  comments:
+    name: comment.line.hash.lookml.manifest
+    match: "#.*"
+
+  # ------------------------------
+  # utility
+  # ------------------------------
+  string:
+    name: string.quoted.double.lookml.manifest
+    begin: \"
+    end: \"
+    patterns:
+      - name: variable.parameter.constant.lookml.manifest
+        match: \@\{[A-Za-z0-9_]*\}
+      - name: constant.character.escape.lookml.manifest
+        match: \\.
+
+  yes_no:
+    patterns:
+      - name: support.constant.yes_no.lookml.manifest
+        match: \b(yes|no)\b
+      - name: invalid.illegal.string.lookml.manifest
+        match: '[^\s"]+'
