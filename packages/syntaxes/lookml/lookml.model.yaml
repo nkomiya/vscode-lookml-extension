@@ -1,0 +1,382 @@
+scopeName: source.lookml.model
+
+patterns:
+  - include: "#comments"
+  - include: "#top_level_opt_string"
+  - include: "#top_level_opt_numeric"
+  - include: "#top_level_opt_ident"
+  - include: "#top_level_opt_yesno"
+  - include: "#week_start_day"
+  - include: "#named_value_format"
+  - include: "#map_layer"
+  - include: "#datagroup"
+  - include: "#access_grant"
+  - include: "#test"
+  - include: "#string"
+
+repository:
+  top_level_opt_string:
+    match: \b(label|connection|include|persist_for)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_string.lookml.model
+      2:
+        name: invalid.illegal.string.lookml.model
+
+  top_level_opt_numeric:
+    match: \b(fiscal_month_offset)\s*:\s*(\d+)?
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml.model
+      2:
+        patterns:
+          - include: "#numeric"
+
+  top_level_opt_ident:
+    match: \b(persist_with)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+
+  top_level_opt_yesno:
+    match: \b(case_sensitive)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml.model
+      2:
+        patterns:
+          - include: "#yesno"
+
+  week_start_day:
+    match: \b(week_start_day)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.week_start_day.lookml.model
+      2:
+        patterns:
+          - name: support.constant.day.lookml.model
+            match: \b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b
+          - name: invalid.illegal.day.lookml.model
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # named value format
+  # ------------------------------
+  named_value_format:
+    begin: \b(named_value_format)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.named_value_format.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#named_value_format_opt_string"
+      - include: "#named_value_format_opt_yesno"
+      - include: "#string"
+
+  named_value_format_opt_string:
+    match: \b(value_format)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_string.lookml.model
+      2:
+        name: invalid.illegal.string.lookml.model
+
+  named_value_format_opt_yesno:
+    match: \b(strict_value_format)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_yesno.lookml.model
+      2:
+        patterns:
+          - include: "#yesno"
+
+  # ------------------------------
+  # map layer
+  # ------------------------------
+  map_layer:
+    begin: \b(map_layer)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.map_layer.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#map_layer_opt_string"
+      - include: "#map_layer_opt_numeric"
+      - include: "#map_layer_opt_ident"
+      - include: "#map_layer_format"
+      - include: "#string"
+
+  map_layer_opt_string:
+    match: \b(extents_json_url|feature_key|file|label|property_key|property_label_key|url)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_string.lookml.model
+      2:
+        name: invalid.illegal.string.lookml.model
+
+  map_layer_opt_numeric:
+    match: \b((max|min)_zoom_level)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml.model
+      3:
+        patterns:
+          - include: "#numeric"
+
+  map_layer_opt_ident:
+    match: \b(projection)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+
+  map_layer_format:
+    match: \b(format)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.format.lookml.model
+      2:
+        patterns:
+          - name: support.constant.day.lookml.model
+            match: \b(topojson|vector_tile_region)\b
+          - name: invalid.illegal.day.lookml.model
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # data group
+  # ------------------------------
+  datagroup:
+    begin: \b(datagroup)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.datagroup.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#datagroup_opt_string"
+      - include: "#datagroup_sql_trigger"
+      - include: "#string"
+
+  datagroup_opt_string:
+    match: \b(label|description|max_cache_age)\s*:\s*([^\s"]+)?
+    captures:
+      1:
+        name: keyword.control.option_string.lookml.model
+      2:
+        name: invalid.illegal.string.lookml.model
+
+  # TODO: embed sql language
+  datagroup_sql_trigger:
+    begin: \b(sql_trigger)
+    beginCaptures:
+      0:
+        name: keyword.control.sql_trigger.lookml.model
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml.model
+    patterns:
+      - include: "#constant"
+
+  # ------------------------------
+  # access grant
+  # ------------------------------
+  access_grant:
+    begin: \b(access_grant)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.access_grant.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#access_grant_opt_ident"
+      - include: "#access_grant_opt_string_array"
+
+  access_grant_opt_ident:
+    match: \b(user_attribute)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+
+  access_grant_opt_string_array:
+    begin: \b(allowed_values)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_string_array.lookml.manifest
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#string"
+
+  # ------------------------------
+  # test
+  # ------------------------------
+  test:
+    begin: \b(test)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.test.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#explore_source"
+      - include: "#assert"
+
+  # explore source
+
+  explore_source:
+    begin: \b(explore_source)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.explore_source.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#column"
+      - include: "#filters"
+
+  column:
+    begin: \b(column)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.column.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#field"
+
+  field:
+    match: \b(field)\s*:\s*([^\s]+)?
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml.model
+      2:
+        patterns:
+          - include: "#ident"
+
+  filters:
+    begin: \b(filters)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.filters.lookml.model
+    end: \]
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml.model
+    patterns:
+      - include: "#string"
+
+  # assert
+
+  assert:
+    begin: \b(assert)\s*:\s*([^\s]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.assert.lookml.model
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#expression"
+
+  # TODO: embed looker expression
+  expression:
+    begin: \b(expression)
+    beginCaptures:
+      0:
+        name: keyword.control.expression.lookml.model
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml.model
+    patterns:
+      - include: "#constant"
+      - include: "#field_ref"
+
+  # ------------------------------
+  # comments
+  # ------------------------------
+  comments:
+    name: comment.line.hash.lookml.model
+    match: "#.*"
+
+  # ------------------------------
+  # utility
+  # ------------------------------
+  constant:
+    name: variable.parameter.constant.lookml.model
+    match: \@\{[A-Za-z0-9_]*\}
+
+  field_ref:
+    name: variable.language.field.lookml.model
+    match: \$\{[A-Za-z0-9_]*(\.[A-Za-z0-9_]*)?\}
+
+  string:
+    name: string.quoted.double.lookml.model
+    begin: \"
+    end: \"
+    patterns:
+      - include: "#constant"
+      - name: constant.character.escape.lookml.model
+        match: \\.
+
+  yesno:
+    patterns:
+      - name: support.constant.yesno.lookml.model
+        match: \b(yes|no)\b
+      - name: invalid.illegal.yesno.lookml.model
+        match: '[^\s"]+'
+
+  numeric:
+    patterns:
+      - name: constant.numeric.lookml.model
+        match: \d+
+      - name: invalid.illegal.numeric.lookml.model
+        match: '[^\s"]+'
+
+  ident_no_dot:
+    patterns:
+      - name: meta.definition.ident.lookml.model
+        match: \b[A-Za-z_][A-Za-z0-9_]*\b
+      - name: invalid.illegal.ident.modifier.lookml.model
+        match: \.[^\s]*
+
+  ident:
+    patterns:
+      - name: meta.definition.ident.lookml.model
+        match: \b[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*\b
+      - name: invalid.illegal.ident.lookml.model
+        match: "[^\\s]*"

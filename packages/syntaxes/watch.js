@@ -23,15 +23,18 @@ function onChange(file) {
   const output = getOutput(file);
   if (output == undefined || lock[output]) return;
   lock[output] = true;
-  if (/json$/.test(output)) {
+  if (/json$/.test(file)) {
     fs.copyFileSync(file, output);
   } else {
-    const data = JSON.stringify(yaml.load(fs.readFileSync(file, "utf-8")));
-    fs.writeFileSync(output, data);
+    try {
+      const data = JSON.stringify(yaml.load(fs.readFileSync(file, "utf-8")));
+      fs.writeFileSync(output, data);
+      console.log(`${output} is updated`);
+    } catch (e) {
+      console.error("failed to parse yaml.");
+    }
   }
   lock[output] = false;
-
-  console.log(`${output} is updated`);
 }
 
 function onUnlink(file) {

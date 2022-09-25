@@ -24,6 +24,21 @@
           "manifest.lkml"
         ],
         "configuration": "./dist/syntaxes/lookml/config.json"
+      },
+      {
+        "id": "lookml.model",
+        "aliases": [
+          "LookML Model"
+        ],
+        "icon": {
+          "light": "./images/looker-favicon-16x16.png",
+          "dark": "./images/looker-favicon-16x16.png"
+        },
+        "extensions": [
+          ".model.lkml",
+          ".model"
+        ],
+        "configuration": "./dist/syntaxes/lookml/config.json"
       }
     ],
     "grammars": [
@@ -31,6 +46,11 @@
         "language": "lookml.manifest",
         "scopeName": "source.lookml.manifest",
         "path": "./dist/syntaxes/lookml/lookml.manifest.json"
+      },
+      {
+        "language": "lookml.model",
+        "scopeName": "source.lookml.model",
+        "path": "./dist/syntaxes/lookml/lookml.model.json"
       }
     ]
   },
