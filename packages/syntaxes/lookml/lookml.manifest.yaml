@@ -16,7 +16,7 @@ repository:
   # project name
   # ------------------------------
   project_name:
-    match: \b(project_name)\s*:\s*([^\s"]*)
+    match: \b(project_name)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -34,12 +34,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#local_dependency_opt_string"
+      - include: "#local_dependency_option_string"
       - include: "#override_constant"
       - include: "#string"
+      - include: "#undefined_block"
 
-  local_dependency_opt_string:
-    match: \b(project)\s*:\s*([^\s"]*)
+  local_dependency_option_string:
+    match: \b(project)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -50,7 +51,7 @@ repository:
   # remote dependency
   # ------------------------------
   remote_dependency:
-    begin: \b(remote_dependency)\s*:\s*([^\s]*)\s*\{
+    begin: \b(remote_dependency)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.remote_dependency.lookml.manifest
@@ -60,12 +61,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#remote_dependency_opt_string"
+      - include: "#remote_dependency_option_string"
       - include: "#override_constant"
       - include: "#string"
+      - include: "#undefined_block"
 
-  remote_dependency_opt_string:
-    match: \b(url|ref)\s*:\s*([^\s"]*)
+  remote_dependency_option_string:
+    match: \b(url|ref)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -76,7 +78,7 @@ repository:
   # override constant
   # ------------------------------
   override_constant:
-    begin: \b(override_constant)\s*:\s*([^\s]*)\s*\{
+    begin: \b(override_constant)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.override_constant.lookml.manifest
@@ -86,11 +88,12 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#override_constant_opt_string"
+      - include: "#override_constant_option_string"
       - include: "#string"
+      - include: "#undefined_block"
 
-  override_constant_opt_string:
-    match: \b(value)\s*:\s*([^\s"]+)?
+  override_constant_option_string:
+    match: \b(value)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -101,7 +104,7 @@ repository:
   # constant
   # ------------------------------
   constant:
-    begin: \b(constant)\s*:\s*([^\s]*)\s*\{
+    begin: \b(constant)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.constant.lookml.manifest
@@ -111,7 +114,7 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - match: \b(export)\s*:\s*([^\s"]*)
+      - match: \b(export)\s*:\s*(\w*)
         captures:
           1:
             name: keyword.control.constant.export.lookml.manifest
@@ -121,11 +124,12 @@ repository:
                 match: \b(none|override_optional|override_required)\b
               - name: invalid.illegal.constant.export.lookml.manifest
                 match: "[^\\s]+"
-      - include: "#constant_opt_string"
+      - include: "#constant_option_string"
       - include: "#string"
+      - include: "#undefined_block"
 
-  constant_opt_string:
-    match: \b(value)\s*:\s*([^\s"]+)?
+  constant_option_string:
+    match: \b(value)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -140,16 +144,15 @@ repository:
     beginCaptures:
       1:
         name: keyword.control.localization_settings.lookml.manifest
-      2:
-        name: meta.definition.ident.lookml.manifest
     end: \}
     patterns:
       - include: "#comments"
       - include: "#localization_level"
       - include: "#default_locale"
+      - include: "#undefined_block"
 
   localization_level:
-    match: \b(localization_level)\s*:\s*([^\s"]*)
+    match: \b(localization_level)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.localization_level.lookml.manifest
@@ -161,7 +164,7 @@ repository:
             match: "[^\\s]+"
 
   default_locale:
-    match: \b(default_locale)\s*:\s*([^\s"]*)
+    match: \b(default_locale)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.default_locale.lookml.manifest
@@ -178,7 +181,7 @@ repository:
   # application
   # ------------------------------
   application:
-    begin: \b(application)\s*:\s*([^\s]*)\s*\{
+    begin: \b(application)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.application.lookml.manifest
@@ -188,12 +191,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#application_opt_string"
+      - include: "#application_option_string"
       - include: "#entitlements"
       - include: "#string"
+      - include: "#undefined_block"
 
-  application_opt_string:
-    match: \b(label|url|file)\s*:\s*([^\s"]+)?
+  application_option_string:
+    match: \b(label|url|file)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_string.lookml.manifest
@@ -208,11 +212,12 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#entitlements_opt_yesno"
-      - include: "#entitlements_opt_string_array"
+      - include: "#entitlements_option_yesno"
+      - include: "#entitlements_option_string_array"
+      - include: "#undefined_block"
 
-  entitlements_opt_yesno:
-    match: \b(local_storage|navigation|new_window|use_form_submit|use_embeds|use_downloads|use_iframes|use_clipboard)\s*:\s*([^\s"]+)?
+  entitlements_option_yesno:
+    match: \b(local_storage|navigation|new_window|use_form_submit|use_embeds|use_downloads|use_iframes|use_clipboard)\s*:\s*(\w*)
     captures:
       1:
         name: keyword.control.option_yesno.lookml.manifest
@@ -220,7 +225,7 @@ repository:
         patterns:
           - include: "#yes_no"
 
-  entitlements_opt_string_array:
+  entitlements_option_string_array:
     begin: \b(new_window_external_urls|core_api_methods|external_api_urls|oauth2_urls|global_user_attributes|scoped_user_attributes)\s*:\s*\[
     beginCaptures:
       1:
@@ -238,28 +243,27 @@ repository:
     beginCaptures:
       1:
         name: keyword.control.visualization.lookml.manifest
-      2:
-        name: meta.definition.ident.lookml.manifest
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#visualization_opt_string"
-      - include: "#visualization_opt_string_array"
+      - include: "#visualization_option_string"
+      - include: "#visualization_option_string_array"
       - include: "#string"
+      - include: "#undefined_block"
 
-  visualization_opt_string:
-    match: \b(id|url|label|sri_hash|file)\s*:\s*([^\s"]+)?
+  visualization_option_string:
+    match: \b(id|url|label|sri_hash|file)\s*:\s*(\w*)
     captures:
       1:
-        name: keyword.control.visualization_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
-  visualization_opt_string_array:
+  visualization_option_string_array:
     begin: \b(dependencies)\s*:\s*\[
     beginCaptures:
       1:
-        name: keyword.control.visualization_opt_string_array.lookml.manifest
+        name: keyword.control.option_string_array.lookml.manifest
     end: \]
     patterns:
       - include: "#comments"
@@ -290,11 +294,20 @@ repository:
       - name: support.constant.yes_no.lookml.manifest
         match: \b(yes|no)\b
       - name: invalid.illegal.string.lookml.manifest
-        match: '[^\s"]+'
+        match: \w+
 
   ident_no_dot:
     patterns:
-      - name: meta.definition.ident.lookml.manifest
-        match: \b[A-Za-z_][A-Za-z0-9_]*\b
-      - name: invalid.illegal.ident.modifier.lookml.manifest
-        match: \.[^\s]*
+      - name: invalid.illegal.ident.lookml
+        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*[$@-][A-Za-z0-9_$@*.-]*"
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_]*(\\.[A-Za-z0-9_]*){1,}"
+
+  undefined_block:
+    begin: \{
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#undefined_block"
