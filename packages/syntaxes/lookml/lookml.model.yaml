@@ -181,18 +181,22 @@ repository:
       2:
         name: invalid.illegal.string.lookml.model
 
-  # TODO: embed sql language
   datagroup_sql_trigger:
-    begin: \b(sql_trigger)
+    begin: \b(sql_trigger)\s*:\s*
     beginCaptures:
-      0:
+      1:
         name: keyword.control.sql_trigger.lookml.model
     end: ;;
     endCaptures:
       0:
         name: punctuation.terminator.semi_semi.lookml.model
     patterns:
-      - include: "#constant"
+      - begin: \G
+        end: (?=;;)
+        contentName: meta.embedded.block.sql
+        patterns:
+          - include: "#constant"
+          - include: "source.sql"
 
   # ------------------------------
   # access grant
@@ -314,7 +318,7 @@ repository:
 
   # TODO: embed looker expression
   expression:
-    begin: \b(expression)
+    begin: \b(expression)\s*:\s*
     beginCaptures:
       0:
         name: keyword.control.expression.lookml.model

@@ -50,7 +50,10 @@
       {
         "language": "lookml.model",
         "scopeName": "source.lookml.model",
-        "path": "./dist/syntaxes/lookml/lookml.model.json"
+        "path": "./dist/syntaxes/lookml/lookml.model.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.sql": "sql"
+        }
       }
     ]
   },
