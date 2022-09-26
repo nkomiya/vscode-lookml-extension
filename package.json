@@ -26,15 +26,16 @@
         "configuration": "./dist/syntaxes/lookml/config.json"
       },
       {
-        "id": "lookml.model",
+        "id": "lookml",
         "aliases": [
-          "LookML Model"
+          "LookML"
         ],
         "icon": {
           "light": "./images/looker-favicon-16x16.png",
           "dark": "./images/looker-favicon-16x16.png"
         },
         "extensions": [
+          ".lkml",
           ".model.lkml",
           ".model"
         ],
@@ -48,11 +49,12 @@
         "path": "./dist/syntaxes/lookml/lookml.manifest.json"
       },
       {
-        "language": "lookml.model",
-        "scopeName": "source.lookml.model",
-        "path": "./dist/syntaxes/lookml/lookml.model.json",
+        "language": "lookml",
+        "scopeName": "source.lookml",
+        "path": "./dist/syntaxes/lookml/lookml.json",
         "embeddedLanguages": {
-          "meta.embedded.block.sql": "sql"
+          "meta.embedded.block.sql": "sql",
+          "meta.embedded.block.lookml.explore": "lookml.explore"
         }
       }
     ]

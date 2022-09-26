@@ -16,10 +16,10 @@ repository:
   # project name
   # ------------------------------
   project_name:
-    match: \b(project_name)\s*:\s*([^\s"]+)?
+    match: \b(project_name)\s*:\s*([^\s"]*)
     captures:
       1:
-        name: keyword.control.project_name.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -39,10 +39,10 @@ repository:
       - include: "#string"
 
   local_dependency_opt_string:
-    match: \b(project)\s*:\s*([^\s"]+)?
+    match: \b(project)\s*:\s*([^\s"]*)
     captures:
       1:
-        name: keyword.control.local_dependency_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -50,10 +50,13 @@ repository:
   # remote dependency
   # ------------------------------
   remote_dependency:
-    begin: \b(remote_dependency)\s*:\s*\{
+    begin: \b(remote_dependency)\s*:\s*([^\s]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.remote_dependency.lookml.manifest
+      2:
+        patterns:
+          - include: "#ident_no_dot"
     end: \}
     patterns:
       - include: "#comments"
@@ -62,10 +65,10 @@ repository:
       - include: "#string"
 
   remote_dependency_opt_string:
-    match: \b(url|ref)\s*:\s*([^\s"]+)?
+    match: \b(url|ref)\s*:\s*([^\s"]*)
     captures:
       1:
-        name: keyword.control.remote_dependency_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -78,7 +81,8 @@ repository:
       1:
         name: keyword.control.override_constant.lookml.manifest
       2:
-        name: meta.definition.ident.lookml.manifest
+        patterns:
+          - include: "#ident_no_dot"
     end: \}
     patterns:
       - include: "#comments"
@@ -89,7 +93,7 @@ repository:
     match: \b(value)\s*:\s*([^\s"]+)?
     captures:
       1:
-        name: keyword.control.override_constant_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -97,12 +101,13 @@ repository:
   # constant
   # ------------------------------
   constant:
-    begin: \b(constant)\s*:\s*([A-Za-z0-9_]+)\s*\{
+    begin: \b(constant)\s*:\s*([^\s]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.constant.lookml.manifest
       2:
-        name: meta.definition.ident.lookml.manifest
+        patterns:
+          - include: "#ident_no_dot"
     end: \}
     patterns:
       - include: "#comments"
@@ -123,7 +128,7 @@ repository:
     match: \b(value)\s*:\s*([^\s"]+)?
     captures:
       1:
-        name: keyword.control.constant_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -134,7 +139,7 @@ repository:
     begin: \b(localization_settings)\s*:\s*\{
     beginCaptures:
       1:
-        name: keyword.control.constant.lookml.manifest
+        name: keyword.control.localization_settings.lookml.manifest
       2:
         name: meta.definition.ident.lookml.manifest
     end: \}
@@ -173,12 +178,13 @@ repository:
   # application
   # ------------------------------
   application:
-    begin: \b(application)\s*:\s*([A-Za-z0-9_]+)\s*\{
+    begin: \b(application)\s*:\s*([^\s]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.application.lookml.manifest
       2:
-        name: meta.definition.ident.lookml.manifest
+        patterns:
+          - include: "#ident_no_dot"
     end: \}
     patterns:
       - include: "#comments"
@@ -190,7 +196,7 @@ repository:
     match: \b(label|url|file)\s*:\s*([^\s"]+)?
     captures:
       1:
-        name: keyword.control.application_opt_string.lookml.manifest
+        name: keyword.control.option_string.lookml.manifest
       2:
         name: invalid.illegal.string.lookml.manifest
 
@@ -209,7 +215,7 @@ repository:
     match: \b(local_storage|navigation|new_window|use_form_submit|use_embeds|use_downloads|use_iframes|use_clipboard)\s*:\s*([^\s"]+)?
     captures:
       1:
-        name: keyword.control.entitlements_opt_yesno.lookml.manifest
+        name: keyword.control.option_yesno.lookml.manifest
       2:
         patterns:
           - include: "#yes_no"
@@ -218,7 +224,7 @@ repository:
     begin: \b(new_window_external_urls|core_api_methods|external_api_urls|oauth2_urls|global_user_attributes|scoped_user_attributes)\s*:\s*\[
     beginCaptures:
       1:
-        name: keyword.control.entitlements_opt_string_array.lookml.manifest
+        name: keyword.control.option_string_array.lookml.manifest
     end: \]
     patterns:
       - include: "#comments"
@@ -285,3 +291,10 @@ repository:
         match: \b(yes|no)\b
       - name: invalid.illegal.string.lookml.manifest
         match: '[^\s"]+'
+
+  ident_no_dot:
+    patterns:
+      - name: meta.definition.ident.lookml.manifest
+        match: \b[A-Za-z_][A-Za-z0-9_]*\b
+      - name: invalid.illegal.ident.modifier.lookml.manifest
+        match: \.[^\s]*

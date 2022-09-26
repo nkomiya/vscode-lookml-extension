@@ -13,16 +13,15 @@ function getOutput(file) {
   if (isJson && basename !== "config.json") {
     return;
   }
-
-  const lang = path.basename(path.dirname(path.resolve(file)));
-  const outDir = path.join(OUT, lang);
-  return path.join(outDir, basename.replace(/yaml$/, "json"));
+  return path.join(OUT, path.relative(ROOT, file)).replace(/yaml$/, "json");
 }
 
 function onChange(file) {
   const output = getOutput(file);
   if (output == undefined || lock[output]) return;
   lock[output] = true;
+
+  fs.mkdirSync(path.dirname(output), { recursive: true });
   if (/json$/.test(file)) {
     fs.copyFileSync(file, output);
   } else {
@@ -34,6 +33,7 @@ function onChange(file) {
       console.error("failed to parse yaml.");
     }
   }
+
   lock[output] = false;
 }
 
