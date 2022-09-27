@@ -275,6 +275,7 @@ repository:
       - include: "#always_filter"
       - include: "#conditionally_filter"
       - include: "#join"
+      - include: "#query"
       - include: "#string"
       - include: "#undefined_block"
 
@@ -473,10 +474,10 @@ repository:
       - include: "#join_option_ident"
       - include: "#join_option_ident_no_dot_array"
       - include: "#join_option_sql"
-      - include: "#undefined_block"
       - include: "#relationship"
       - include: "#join_type"
       - include: "#string"
+      - include: "#undefined_block"
 
   join_option_string:
     match: \b(view_label)\s*:\s*(\w*)
@@ -555,6 +556,69 @@ repository:
             match: \b(inner|(left|full)_outer|cross)\b
           - name: invalid.illegal.join_type.lookml
             match: "[^\\s]+"
+
+  # ------------------------------
+  # query (quick start)
+  # ------------------------------
+  query:
+    begin: \b(query)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.query.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#query_option_string"
+      - include: "#query_option_numeric"
+      - include: "#query_option_ident_array"
+      - include: "#sorts"
+      - include: "#filters"
+      - include: "#string"
+      - include: "#undefined_block"
+
+  query_option_string:
+    match: \b(label|description)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
+      2:
+        name: invalid.illegal.string.lookml
+
+  query_option_numeric:
+    match: \b(limit)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml
+      2:
+        patterns:
+          - include: "#numeric"
+
+  query_option_ident_array:
+    begin: \b(dimensions|measures|pivots)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_array.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#ident"
+
+  sorts:
+    begin: \b(sorts)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.sorts.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - match: :\s*\b(asc|desc)\b
+        captures:
+          1:
+            name: support.constant.sort.lookml
+      - include: "#ident"
 
   # ==============================================
   # test specific parameter blocks
@@ -667,6 +731,8 @@ repository:
         name: keyword.control.filters.lookml
     end: \]
     patterns:
+      - include: "#comments"
+      - include: "#ident"
       - include: "#string"
 
   # ------------------------------
