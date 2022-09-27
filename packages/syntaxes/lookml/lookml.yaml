@@ -275,7 +275,8 @@ repository:
       - include: "#always_filter"
       - include: "#conditionally_filter"
       - include: "#join"
-      - include: "#query"
+      - include: "#aggregate_table"
+      - include: "#quick_start_query"
       - include: "#string"
       - include: "#undefined_block"
 
@@ -558,9 +559,24 @@ repository:
             match: "[^\\s]+"
 
   # ------------------------------
-  # query (quick start)
+  # aggregation awareness
   # ------------------------------
-  query:
+  aggregate_table:
+    begin: \b(aggregate_table)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.aggregate_table.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#aggregate_table_query"
+      - include: "#materialization"
+      - include: "#undefined_block"
+
+  aggregate_table_query:
     begin: \b(query)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
@@ -571,15 +587,137 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#query_option_string"
-      - include: "#query_option_numeric"
-      - include: "#query_option_ident_array"
+      - include: "#aggregate_table_query_ident_array"
+      - include: "#timezone"
+      - include: "#sorts"
+      - include: "#filters"
+      - include: "#undefined_block"
+
+  aggregate_table_query_ident_array:
+    begin: \b(dimensions|measures)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_array.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#ident"
+
+  timezone:
+    # allow "/" for timezone name.
+    match: \b(timezone)\s*:\s*([A-Za-z0-9_$@*./-]*)
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml
+
+  ### materialization controls
+
+  materialization:
+    begin: \b(materialization)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.materialization.lookml
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#materialization_option_string"
+      - include: "#materialization_option_string_array"
+      - include: "#materialization_option_numeric"
+      - include: "#materialization_option_ident"
+      - include: "#materialization_option_sql"
+      - include: "#distribution_style"
+      - include: "#string"
+      - include: "#undefined_block"
+
+  materialization_option_string:
+    match: \b(persist_for|distribution)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
+      2:
+        name: invalid.illegal.string.lookml
+
+  materialization_option_string_array:
+    begin: \b(cluster_keys|indexes|partition_keys|sortkeys|increment_key)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_string_array.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#string"
+
+  materialization_option_numeric:
+    match: \b(increment_offset)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml
+      2:
+        patterns:
+          - include: "#numeric"
+
+  materialization_option_ident:
+    match: \b(datagroup_trigger)\s*:\s*([A-Za-z0-9_$@*.-]*)
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+
+  materialization_option_sql:
+    begin: \b(sql_trigger_value)\s*:\s*
+    beginCaptures:
+      1:
+        name: keyword.control.sql_option.lookml
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml
+    patterns:
+      - begin: \G
+        end: (?=;;)
+        contentName: meta.embedded.block.sql
+        patterns:
+          - include: "#constant_ref"
+          - include: "#dollar_field_ref"
+          - include: "source.sql"
+
+  distribution_style:
+    match: \b(distribution_style)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.format.lookml
+      2:
+        patterns:
+          - name: support.constant.distribution_style.lookml
+            match: \b(all|even)\b
+          - name: invalid.illegal.distribution_style.lookml
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # query (quick start)
+  # ------------------------------
+  quick_start_query:
+    begin: \b(query)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.query.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#quick_start_query_option_string"
+      - include: "#quick_start_query_option_numeric"
+      - include: "#quick_start_query_option_ident_array"
       - include: "#sorts"
       - include: "#filters"
       - include: "#string"
       - include: "#undefined_block"
 
-  query_option_string:
+  quick_start_query_option_string:
     match: \b(label|description)\s*:\s*(\w*)
     captures:
       1:
@@ -587,7 +725,7 @@ repository:
       2:
         name: invalid.illegal.string.lookml
 
-  query_option_numeric:
+  quick_start_query_option_numeric:
     match: \b(limit)\s*:\s*(\w*)
     captures:
       1:
@@ -596,7 +734,7 @@ repository:
         patterns:
           - include: "#numeric"
 
-  query_option_ident_array:
+  quick_start_query_option_ident_array:
     begin: \b(dimensions|measures|pivots)\s*:\s*\[
     beginCaptures:
       1:
@@ -606,6 +744,9 @@ repository:
       - include: "#comments"
       - include: "#ident"
 
+  # ------------------------------
+  # common query option
+  # ------------------------------
   sorts:
     begin: \b(sorts)\s*:\s*\[
     beginCaptures:
