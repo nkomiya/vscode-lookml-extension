@@ -4,8 +4,10 @@ patterns:
   - include: "#comments"
   - include: "#model"
   - include: "#explore"
+  - include: "#view"
   - include: "#test"
   - include: "#string"
+  - include: "#undefined_block"
 
 repository:
   # ==============================================
@@ -252,7 +254,7 @@ repository:
   # explore specific parameter blocks
   # ==============================================
   explore:
-    begin: \b(explore)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    begin: \b(explore)\s*:\s*\+?([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
         name: keyword.control.explore.lookml
@@ -270,7 +272,7 @@ repository:
       - include: "#explore_option_ident_no_dot_array"
       - include: "#explore_option_sql"
       - include: "#extension"
-      - include: "#fields"
+      - include: "#fields_explore"
       - include: "#access_filter"
       - include: "#always_filter"
       - include: "#conditionally_filter"
@@ -362,21 +364,9 @@ repository:
           - include: "source.sql"
 
   # ------------------------------
-  # top level options
+  # files parameter for explore
   # ------------------------------
-  extension:
-    match: \b(extension)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.extension.lookml
-      2:
-        patterns:
-          - name: support.constant.day.lookml
-            match: \b(required)\b
-          - name: invalid.illegal.day.lookml
-            match: "[^\\s]+"
-
-  fields:
+  fields_explore:
     begin: \b(fields)\s*:\s*\[
     beginCaptures:
       1:
@@ -384,7 +374,14 @@ repository:
     end: \]
     patterns:
       - include: "#comments"
-      - include: "#literal_fields_ref"
+      - include: "#fields_allow_minus"
+      # all field
+      - match: (\B-|\b)[A-Za_z0-9_]+\.[A-Za_z0-9_]+(\*\B|\b)
+      - match: (\B-|\b)(ALL_FIELDS)(\*\B|\b)
+        captures:
+          2:
+            name: support.constant.all_fields.lookml
+
 
   # ------------------------------
   # access filter
@@ -475,6 +472,7 @@ repository:
       - include: "#join_option_ident"
       - include: "#join_option_ident_no_dot_array"
       - include: "#join_option_sql"
+      - include: "#fields_join"
       - include: "#relationship"
       - include: "#join_type"
       - include: "#string"
@@ -507,7 +505,7 @@ repository:
           - include: "#ident_no_dot"
 
   join_option_ident_no_dot_array:
-    begin: \b(fields|required_joins|required_access_grants)\s*:\s*\[
+    begin: \b(required_joins|required_access_grants)\s*:\s*\[
     beginCaptures:
       1:
         name: keyword.control.option_ident_no_dot_array.lookml
@@ -533,6 +531,16 @@ repository:
           - include: "#constant_ref"
           - include: "#dollar_field_ref"
           - include: "source.sql"
+
+  fields_join:
+    begin: \b(fields)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_no_dot_array.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#fields_allow_star"
 
   relationship:
     match: \b(relationship)\s*:\s*(\w*)
@@ -603,13 +611,6 @@ repository:
       - include: "#comments"
       - include: "#ident"
 
-  timezone:
-    # allow "/" for timezone name.
-    match: \b(timezone)\s*:\s*([A-Za-z0-9_$@*./-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-
   ### materialization controls
 
   materialization:
@@ -626,6 +627,7 @@ repository:
       - include: "#materialization_option_ident"
       - include: "#materialization_option_sql"
       - include: "#distribution_style"
+      - include: "#datagroup_trigger"
       - include: "#string"
       - include: "#undefined_block"
 
@@ -656,15 +658,6 @@ repository:
         patterns:
           - include: "#numeric"
 
-  materialization_option_ident:
-    match: \b(datagroup_trigger)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-
   materialization_option_sql:
     begin: \b(sql_trigger_value)\s*:\s*
     beginCaptures:
@@ -682,18 +675,6 @@ repository:
           - include: "#constant_ref"
           - include: "#dollar_field_ref"
           - include: "source.sql"
-
-  distribution_style:
-    match: \b(distribution_style)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.format.lookml
-      2:
-        patterns:
-          - name: support.constant.distribution_style.lookml
-            match: \b(all|even)\b
-          - name: invalid.illegal.distribution_style.lookml
-            match: "[^\\s]+"
 
   # ------------------------------
   # query (quick start)
@@ -744,23 +725,324 @@ repository:
       - include: "#comments"
       - include: "#ident"
 
-  # ------------------------------
-  # common query option
-  # ------------------------------
-  sorts:
-    begin: \b(sorts)\s*:\s*\[
+  # ==============================================
+  # View specific parameter blocks
+  # ==============================================
+  view:
+    begin: \b(view)\s*:\s*\+?([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
-        name: keyword.control.sorts.lookml
+        name: keyword.control.view.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#derived_table"
+      - include: "#view_option_string"
+      - include: "#view_option_ident_no_dot_array"
+      - include: "#view_option_yesno"
+      - include: "#view_option_sql"
+      - include: "#set"
+      - include: "#drill_fields"
+      - include: "#extension"
+      - include: "#string"
+      - include: "#undefined_block"
+
+  view_option_string:
+    match: \b(label)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
+      2:
+        name: invalid.illegal.string.lookml
+
+  view_option_ident_no_dot_array:
+    begin: \b(extends|required_access_grants)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_no_dot_array.lookml
     end: \]
     patterns:
       - include: "#comments"
-      - match: :\s*\b(asc|desc)\b
-        captures:
-          1:
-            name: support.constant.sort.lookml
-      - include: "#ident"
+      - include: "#ident_no_dot"
 
+  view_option_yesno:
+    match: \b(fields_hidden_by_default|suggestions|final)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_yesno.lookml
+      2:
+        patterns:
+          - include: "#yesno"
+
+  view_option_sql:
+    begin: \b(sql_table_name)\s*:\s*
+    beginCaptures:
+      1:
+        name: keyword.control.sql_option.lookml
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml
+    patterns:
+      - begin: \G
+        end: (?=;;)
+        contentName: meta.embedded.block.sql
+        patterns:
+          - include: "#constant_ref"
+          - include: "#dollar_field_ref"
+          - include: "source.sql"
+
+  # ------------------------------
+  # set, drill fields
+  # ------------------------------
+  set:
+    begin: \b(set)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.set.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - begin: \b(fields)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.option_ident_no_dot_array.lookml
+        end: \]
+        patterns:
+          - include: "#comments"
+          - include: "#fields_allow_star"
+      - include: "#undefined_block"
+
+  drill_fields:
+    begin: \b(drill_fields)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.drill_fields.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#fields_allow_star"
+
+  # ------------------------------
+  # derived table
+  # ------------------------------
+  derived_table:
+    begin: \b(derived_table)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.derived_table.lookml
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#derived_table_option_string"
+      - include: "#derived_table_option_string_array"
+      - include: "#derived_table_option_numeric"
+      - include: "#derived_table_option_yesno"
+      - include: "#derived_table_option_sql"
+      - include: "#derived_table_explore_source"
+      - include: "#table_compression"
+      - include: "#table_format"
+      - include: "#datagroup_trigger"
+      - include: "#create_process"
+      - include: "#distribution_style"
+      - include: "#string"
+      - include: "#undefined_block"
+
+  derived_table_option_string:
+    match: \b(persist_for|distribution|interval_trigger|increment_key)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
+      2:
+        name: invalid.illegal.string.lookml
+
+  derived_table_option_string_array:
+    begin: \b(cluster_keys|indexes|partition_keys|sortkeys)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_string_array.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - include: "#string"
+
+  derived_table_option_numeric:
+    match: \b(increment_offset)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml
+      2:
+        patterns:
+          - include: "#numeric"
+
+  derived_table_option_yesno:
+    match: \b(materialized_view|publish_as_db_view)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_yesno.lookml
+      2:
+        patterns:
+          - include: "#yesno"
+
+  derived_table_option_sql:
+    begin: \b(sql(_trigger_value|_create)?)\s*:\s*
+    beginCaptures:
+      1:
+        name: keyword.control.sql_option.lookml
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml
+    patterns:
+      - begin: \G
+        end: (?=;;)
+        contentName: meta.embedded.block.sql
+        patterns:
+          - include: "#constant_ref"
+          - include: "#dollar_field_ref"
+          - include: "source.sql"
+
+  create_process:
+    begin: \b(create_process)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.create_process.lookml
+    end: \}
+    patterns:
+      - include: "#comments"
+      - patterns:
+          - begin: \b(sql_step)\s*:\s*
+            beginCaptures:
+              1:
+                name: keyword.control.sql_option.lookml
+            end: ;;
+            endCaptures:
+              0:
+                name: punctuation.terminator.semi_semi.lookml
+            patterns:
+              - begin: \G
+                end: (?=;;)
+                contentName: meta.embedded.block.sql
+                patterns:
+                  - include: "#constant_ref"
+                  - include: "#dollar_field_ref"
+                  - include: "source.sql"
+      - include: "#undefined_block"
+
+  table_compression:
+    match: \b(table_compression)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.table_compression.lookml
+      2:
+        patterns:
+          - name: support.constant.table_compression.lookml
+            match: \b(GZIP|SNAPPY)\b
+          - name: invalid.illegal.table_compression.lookml
+            match: "[^\\s]+"
+
+  table_format:
+    match: \b(table_format)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.table_format.lookml
+      2:
+        patterns:
+          - name: support.constant.table_format.lookml
+            match: \b(PARQUET|ORC|AVRO|JSON|TEXTFILE)\b
+          - name: invalid.illegal.table_format.lookml
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # explore source
+  # ------------------------------
+  derived_table_explore_source:
+    begin: \b(explore_source)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.explore_source.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#column"
+      - include: "#derived_column"
+      - include: "#expression_custom_filter"
+      - include: "#filters"
+      - include: "#sorts"
+      - include: "#limit"
+      - include: "#timezone"
+      - include: "#bind_filters"
+      - include: "#bind_all_filters"
+      - include: "#string"
+      - include: "#undefined_block"
+
+  derived_column:
+    begin: \b(derived_column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.derived_column.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - begin: \b(sql)\s*:\s*
+        beginCaptures:
+          1:
+            name: keyword.control.sql_option.lookml
+        end: ;;
+        endCaptures:
+          0:
+            name: punctuation.terminator.semi_semi.lookml
+        patterns:
+          - begin: \G
+            end: (?=;;)
+            contentName: meta.embedded.block.sql
+            patterns:
+              - include: "#constant_ref"
+              - include: "#dollar_field_ref"
+              - include: "source.sql"
+      - include: "#undefined_block"
+
+  bind_filters:
+    begin: \b(bind_filters)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.bind_filters.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - patterns:
+          - match: \b((from|to)_field)\s*:\s*([A-Za-z0-9_$@*.-]*)
+            captures:
+              1:
+                name: keyword.control.option_ident.lookml
+              3:
+                patterns:
+                  - include: "#ident"
+      - include: "#undefined_block"
+
+  bind_all_filters:
+    match: \b(bind_all_filters)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_yesno.lookml
+      2:
+        patterns:
+          - include: "#yesno"
   # ==============================================
   # test specific parameter blocks
   # ==============================================
@@ -775,14 +1057,14 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#explore_source"
+      - include: "#test_explore_source"
       - include: "#assert"
       - include: "#undefined_block"
 
   # ------------------------------
   # explore source
   # ------------------------------
-  explore_source:
+  test_explore_source:
     begin: \b(explore_source)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
@@ -794,21 +1076,12 @@ repository:
     patterns:
       - include: "#comments"
       - include: "#column"
+      - include: "#expression_custom_filter"
       - include: "#filters"
-      - include: "#undefined_block"
-
-  column:
-    begin: \b(column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
-    beginCaptures:
-      1:
-        name: keyword.control.column.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-    end: \}
-    patterns:
-      - include: "#comments"
-      - include: "#field"
+      - include: "#sorts"
+      - include: "#limit"
+      - include: "#timezone"
+      - include: "#string"
       - include: "#undefined_block"
 
   # ------------------------------
@@ -865,6 +1138,38 @@ repository:
             patterns:
               - include: "#ident"
 
+  fields_allow_star:
+    patterns:
+      # object references
+      - name: invalid.illegal.ident1.lookml
+        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      # invalid  star
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*\\*[A-Za-z0-9_$@*.-]+"
+      # invalid character
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*[$@-][A-Za-z0-9_$@*.-]*"
+      # two or more dots
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){2,}"
+
+  fields_allow_minus:
+    patterns:
+      # object references
+      - name: invalid.illegal.ident1.lookml
+        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      # invalid minus / star
+      - name: invalid.illegal.ident2.lookml
+        match: "[A-Za-z0-9_$@*.-]+-[A-Za-z0-9_$@*.-]*"
+      - name: invalid.illegal.ident3.lookml
+        match: "[A-Za-z0-9_$@*.-]*\\*[A-Za-z0-9_$@*.-]+"
+      # invalid character
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*[$@][A-Za-z0-9_$@*.-]*"
+      # two or more dots
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){2,}"
+
   filters:
     begin: \b(filters)\s*:\s*\[
     beginCaptures:
@@ -884,16 +1189,114 @@ repository:
     match: \@\{[A-Za-z0-9_]*\}
 
   dollar_field_ref:
-    name: variable.language.field.lookml
-    match: \$\{[A-Za-z0-9_]*(\.[A-Za-z0-9_]*)?\}
-
-  literal_fields_ref:
     patterns:
-      - match: \b(ALL_FIELDS)\*[A-Za-z0-9_]
-      - match: \b(ALL_FIELDS)\*
+      - name: variable.language.field.lookml
+        match: \$\{([A-Za-z0-9_]+\.)?(SQL_TABLE_NAME)\}
+        captures:
+          2:
+            name: support.constant.sql_table_name.lookml
+      - name: variable.language.field.lookml
+        match: \$\{[A-Za-z0-9_]*(\.[A-Za-z0-9_]*)?\}
+
+  # ------------------------------
+  # query, explore source
+  # ------------------------------
+  sorts:
+    begin: \b(sorts)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.sorts.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - match: :\s*\b(asc|desc)\b
         captures:
           1:
-            name: support.constant.all_fields.lookml
+            name: support.constant.sort.lookml
+      - include: "#ident"
+
+  column:
+    begin: \b(column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.column.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#field"
+      - include: "#undefined_block"
+
+  expression_custom_filter:
+    begin: \b(expression_custom_filter)\s*:\s*
+    beginCaptures:
+      1:
+        name: keyword.control.expression_custom_filter.lookml
+    end: ;;
+    endCaptures:
+      0:
+        name: punctuation.terminator.semi_semi.lookml
+    patterns:
+      - begin: \G
+        end: (?=;;)
+        contentName: meta.embedded.block.sql
+        patterns:
+          - include: "#constant_ref"
+          - include: "#dollar_field_ref"
+          - include: "source.sql"
+
+  limit:
+    match: \b(limit)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml
+      2:
+        patterns:
+          - include: "#numeric"
+
+  # ------------------------------
+  # other
+  # ------------------------------
+  extension:
+    match: \b(extension)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.extension.lookml
+      2:
+        patterns:
+          - name: support.constant.day.lookml
+            match: \b(required)\b
+          - name: invalid.illegal.day.lookml
+            match: "[^\\s]+"
+
+  datagroup_trigger:
+    match: \b(datagroup_trigger)\s*:\s*([A-Za-z0-9_$@*.-]*)
+    captures:
+      1:
+        name: keyword.control.option_ident.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+
+  timezone:
+    match: \b(timezone)\s*:\s*
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
+
+  distribution_style:
+    match: \b(distribution_style)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.format.lookml
+      2:
+        patterns:
+          - name: support.constant.distribution_style.lookml
+            match: \b(all|even)\b
+          - name: invalid.illegal.distribution_style.lookml
+            match: "[^\\s]+"
 
   # ==============================================
   # utility
@@ -923,21 +1326,26 @@ repository:
 
   ident_no_dot:
     patterns:
+      # object reference
       - name: invalid.illegal.ident.lookml
         match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      # invalid character
       - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_$@*.-]*[$@-][A-Za-z0-9_$@*.-]*"
+        match: "[A-Za-z0-9_$@*.-]*[$@*-][A-Za-z0-9_$@*.-]*"
+      # has dot
       - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_]*(\\.[A-Za-z0-9_]*){1,}"
+        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){1,}"
 
   ident:
     patterns:
       - name: invalid.illegal.ident.lookml
         match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      # invalid character
       - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_$@*.-]*[$@-][A-Za-z0-9_$@*.-]*"
+        match: "[A-Za-z0-9_$@*.-]*[$@*-][A-Za-z0-9_$@*.-]*"
+      # two or more dots
       - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_]*(\\.[A-Za-z0-9_]*){2,}"
+        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){2,}"
 
   undefined_block:
     begin: \{
