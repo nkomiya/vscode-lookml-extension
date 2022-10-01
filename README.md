@@ -1,1 +1,1 @@
-# vscode-bq-extension
+# vscode-lookml-extension

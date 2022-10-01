@@ -9,6 +9,8 @@
   "categories": [
     "Programming Languages"
   ],
+  "publisher": "nkomiya",
+  "repository": "https://github.com:nkomiya/vscode-lookml-extension.git",
   "contributes": {
     "languages": [
       {
@@ -66,9 +68,10 @@
     "watch": "tsc -b -w"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
     "@types/node": "16.x",
-    "typescript": "^4.7.4"
+    "@types/vscode": "^1.71.0",
+    "typescript": "^4.7.4",
+    "vsce": "^2.11.0"
   },
   "workspaces": [
     "packages/syntaxes"
