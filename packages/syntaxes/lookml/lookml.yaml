@@ -7,7 +7,7 @@ patterns:
   - include: "#view"
   - include: "#test"
   - include: "#string"
-  - include: "#undefined_block"
+  - include: "#invalid_curl"
 
 repository:
   # ==============================================
@@ -15,65 +15,61 @@ repository:
   # ==============================================
   model:
     patterns:
-      - include: "#model_option_string"
-      - include: "#model_option_numeric"
-      - include: "#model_option_ident"
-      - include: "#model_option_yesno"
-      - include: "#week_start_day"
+      # string options
+      - match: \b(label|connection|include|persist_for)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # numeric options
+      - match: \b(fiscal_month_offset)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_numeric.lookml
+          2:
+            patterns:
+              - include: "#numeric"
+
+      # identifier without dot
+      - match: \b(persist_with)\s*:\s*([A-Za-z0-9_$@*.-]*)
+        captures:
+          1:
+            name: keyword.control.option_ident.lookml
+          2:
+            patterns:
+              - include: "#ident_no_dot"
+
+      # yesno
+      - match: \b(case_sensitive)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
+      # week start day
+      - match: \b(week_start_day)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.week_start_day.lookml
+          2:
+            patterns:
+              - name: support.constant.day.lookml
+                match: \b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b
+              - name: invalid.illegal.day.lookml
+                match: \w+
+
+      # model specific blocks
       - include: "#named_value_format"
       - include: "#map_layer"
       - include: "#datagroup"
       - include: "#access_grant"
 
-  model_option_string:
-    match: \b(label|connection|include|persist_for)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  model_option_numeric:
-    match: \b(fiscal_month_offset)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_numeric.lookml
-      2:
-        patterns:
-          - include: "#numeric"
-
-  model_option_ident:
-    match: \b(persist_with)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-
-  model_option_yesno:
-    match: \b(case_sensitive)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
-
-  week_start_day:
-    match: \b(week_start_day)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.week_start_day.lookml
-      2:
-        patterns:
-          - name: support.constant.day.lookml
-            match: \b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b
-          - name: invalid.illegal.day.lookml
-            match: "[^\\s]+"
-
   # ------------------------------
-  # named value format
+  # Model: named value format
   # ------------------------------
   named_value_format:
     begin: \b(named_value_format)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -86,31 +82,29 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#named_value_format_option_string"
-      - include: "#named_value_format_option_yesno"
+
+      # string options
+      - match: \b(value_format)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # yesno options
+      - match: \b(strict_value_format)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
       - include: "#string"
-      - include: "#undefined_block"
-
-
-  named_value_format_option_string:
-    match: \b(value_format)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  named_value_format_option_yesno:
-    match: \b(strict_value_format)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # map layer
+  # Model: map layer
   # ------------------------------
   map_layer:
     begin: \b(map_layer)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -123,53 +117,50 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#map_layer_option_string"
-      - include: "#map_layer_option_numeric"
-      - include: "#map_layer_option_ident"
-      - include: "#map_layer_format"
+
+      # string option
+      - match: \b(extents_json_url|feature_key|file|label|property_key|property_label_key|url)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # numeric option
+      - match: \b((max|min)_zoom_level)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_numeric.lookml
+          3:
+            patterns:
+              - include: "#numeric"
+
+      # identifier without dot
+      - match: \b(projection)\s*:\s*([A-Za-z0-9_$@*.-]*)
+        captures:
+          1:
+            name: keyword.control.option_ident.lookml
+          2:
+            patterns:
+              - include: "#ident_no_dot"
+
+      # format
+      - match: \b(format)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.format.lookml
+          2:
+            patterns:
+              - name: support.constant.day.lookml
+                match: \b(topojson|vector_tile_region)\b
+              - name: invalid.illegal.day.lookml
+                match: \w+
+
       - include: "#string"
-      - include: "#undefined_block"
-
-  map_layer_option_string:
-    match: \b(extents_json_url|feature_key|file|label|property_key|property_label_key|url)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  map_layer_option_numeric:
-    match: \b((max|min)_zoom_level)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_numeric.lookml
-      3:
-        patterns:
-          - include: "#numeric"
-
-  map_layer_option_ident:
-    match: \b(projection)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-
-  map_layer_format:
-    match: \b(format)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.format.lookml
-      2:
-        patterns:
-          - name: support.constant.day.lookml
-            match: \b(topojson|vector_tile_region)\b
-          - name: invalid.illegal.day.lookml
-            match: "[^\\s]+"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # data group
+  # Model: data group
   # ------------------------------
   datagroup:
     begin: \b(datagroup)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -182,38 +173,26 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#datagroup_option_string"
-      - include: "#datagroup_sql_trigger"
-      - include: "#string"
-      - include: "#undefined_block"
 
-  datagroup_option_string:
-    match: \b(label|description|max_cache_age)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
+      # string
+      - match: \b(label|description|max_cache_age)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
 
-  datagroup_sql_trigger:
-    begin: \b(sql_trigger)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
+      # sql
+      - begin: \b(?=sql_trigger\s*:\s*)
+        end: ;;
         patterns:
-          - include: "#constant_ref"
-          - include: "source.sql"
+          - include: "#sql_block"
+
+      - include: "#string"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # access grant
+  # Model: access grant
   # ------------------------------
   access_grant:
     begin: \b(access_grant)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -226,28 +205,27 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#access_grant_option_ident"
-      - include: "#access_grant_option_string_array"
-      - include: "#undefined_block"
 
-  access_grant_option_ident:
-    match: \b(user_attribute)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
+      # identifier without dot
+      - match: \b(user_attribute)\s*:\s*([A-Za-z0-9_$@*.-]*)
+        captures:
+          1:
+            name: keyword.control.option_ident.lookml
+          2:
+            patterns:
+              - include: "#ident_no_dot"
+
+      # string array
+      - begin: \b(allowed_values)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.option_string_array.lookml
+        end: \]
         patterns:
-          - include: "#ident_no_dot"
+          - include: "#comments"
+          - include: "#string"
 
-  access_grant_option_string_array:
-    begin: \b(allowed_values)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_string_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#string"
+      - include: "#invalid_curl"
 
 
   # ==============================================
@@ -264,59 +242,35 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#explore_option_string"
-      - include: "#explore_option_string_array"
-      - include: "#explore_option_yesno"
-      - include: "#explore_option_ident"
-      - include: "#explore_option_ident_array"
-      - include: "#explore_option_ident_no_dot_array"
-      - include: "#explore_option_sql"
-      - include: "#extension"
-      - include: "#fields_explore"
-      - include: "#access_filter"
-      - include: "#always_filter"
-      - include: "#conditionally_filter"
-      - include: "#join"
-      - include: "#aggregate_table"
-      - include: "#quick_start_query"
-      - include: "#string"
-      - include: "#undefined_block"
 
-  explore_option_string:
-    match: \b(description|group_label|view_label|label|persist_for)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  explore_option_string_array:
-    begin: \b(tags)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.tags.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#string"
-
-  explore_option_yesno:
-    match: \b(hidden|case_sensitive|symmetric_aggregates)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
-
-  explore_option_ident:
-    patterns:
-      - match: \b(from|view_name|persist_with)\s*:\s*([$@]\{[\w.]*\})
+      # string
+      - match: \b(description|group_label|view_label|label|persist_for)\s*:\s*(\w*)
         captures:
           1:
-            name: keyword.control.option_ident.lookml
+            name: keyword.control.option_string.lookml
           2:
-            name: invalid.illegal.ident.lookml
+            name: invalid.illegal.string.lookml
+
+      # string array
+      - begin: \b(tags)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.tags.lookml
+        end: \]
+        patterns:
+          - include: "#comments"
+          - include: "#string"
+
+      # yesno
+      - match: \b(hidden|case_sensitive|symmetric_aggregates)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
+      # identifier without dot
       - match: \b(from|persist_with|view_name)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -325,46 +279,40 @@ repository:
             patterns:
               - include: "#ident_no_dot"
 
-  explore_option_ident_array:
-    begin: \b(cancel_grouping_fields)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident"
-
-  explore_option_ident_no_dot_array:
-    begin: \b(extends|always_join|required_access_grants)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_no_dot_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident_no_dot"
-
-  explore_option_sql:
-    begin: \b(sql_(always_where|always_having|table_name))\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
+      # identifier array without dot
+      - begin: \b(?=cancel_grouping_fields\s*:\s*\[)
+        end: \]
         patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
+          - include: "#option_ident_array"
+
+      # identifier array with dot
+      - begin: \b(?=extends|always_join|required_access_grants\s*:\s*\[)
+        end: \]
+        patterns:
+          - include: "#option_ident_no_dot_array"
+
+      # sql
+      - begin: \b(?=sql_(always_where|always_having|table_name)\s*:\s*)
+        end: ;;
+        patterns:
+          - include: "#sql_block"
+
+      # explore specific blocks
+      - include: "#fields_explore"
+      - include: "#access_filter"
+      - include: "#always_filter"
+      - include: "#conditionally_filter"
+      - include: "#join"
+      - include: "#aggregate_table"
+      - include: "#query_explore"
+
+      # common blocks
+      - include: "#extension"
+      - include: "#string"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # files parameter for explore
+  # Explore: fields
   # ------------------------------
   fields_explore:
     begin: \b(fields)\s*:\s*\[
@@ -384,7 +332,7 @@ repository:
 
 
   # ------------------------------
-  # access filter
+  # Explore: access filter
   # ------------------------------
   access_filter:
     begin: \b(access_filter)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -397,18 +345,8 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#access_filter_option_ident"
-      - include: "#field"
-      - include: "#undefined_block"
 
-  access_filter_option_ident:
-    patterns:
-      - match: \b(user_attribute)\s*:\s*([$@]\{[\w.]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
+      # identifier without dot
       - match: \b(user_attribute)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -417,8 +355,13 @@ repository:
             patterns:
               - include: "#ident_no_dot"
 
+      # common blocks
+      - include: "#field"
+      - include: "#invalid_curl"
+
+
   # ------------------------------
-  # explore filters
+  # Explore: always filter
   # ------------------------------
   always_filter:
     begin: \b(always_filter)\s*:\s*\{
@@ -428,9 +371,14 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#filters"
-      - include: "#undefined_block"
 
+      # common blocks
+      - include: "#filters"
+      - include: "#invalid_curl"
+
+  # ------------------------------
+  # Explore: conditionally filter
+  # ------------------------------
   conditionally_filter:
     begin: \b(conditionally_filter)\s*:\s*\{
     beginCaptures:
@@ -439,22 +387,19 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#conditionally_filter_option_ident_array"
-      - include: "#filters"
-      - include: "#undefined_block"
 
-  conditionally_filter_option_ident_array:
-    begin: \b(unless)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident"
+      # identifier array with dot
+      - begin: \b(?=unless\s*:\s*\[)
+        end: \]
+        patterns:
+          - include: "#option_ident_array"
+
+      # common blocks
+      - include: "#filters"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # join
+  # Explore: join
   # ------------------------------
   join:
     begin: \b(join)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -467,70 +412,53 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#join_option_string"
-      - include: "#join_option_yesno"
-      - include: "#join_option_ident"
-      - include: "#join_option_ident_no_dot_array"
-      - include: "#join_option_sql"
+
+      # string
+      - match: \b(view_label)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # yesno
+      - match: \b(outer_only)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
+      # identifier without dot
+      - match: \b(from|foreign_key)\s*:\s*([A-Za-z0-9_$@*.-]*)
+        captures:
+          1:
+            name: keyword.control.option_ident.lookml
+          2:
+            patterns:
+              - include: "#ident_no_dot"
+
+      # identifier array without dot
+      - begin: \b(?=(required_joins|required_access_grants)\s*:\s*\[)
+        end: \]
+        patterns:
+          - include: "#option_ident_no_dot_array"
+
+      # sql
+      - begin: \b(?=(sql_(on|where|table_name|foreign_key)|sql)\s*:\s*)
+        end: ;;
+        patterns:
+          - include: "#sql_block"
+
+      # join specific blocks
       - include: "#fields_join"
+      - include: "#type_join"
       - include: "#relationship"
-      - include: "#join_type"
+
+      # common blocks
       - include: "#string"
-      - include: "#undefined_block"
-
-  join_option_string:
-    match: \b(view_label)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  join_option_yesno:
-    match: \b(outer_only)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
-
-  join_option_ident:
-    match: \b(from|foreign_key)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-
-  join_option_ident_no_dot_array:
-    begin: \b(required_joins|required_access_grants)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_no_dot_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident_no_dot"
-
-  join_option_sql:
-    begin: \b(sql_(on|where|table_name|foreign_key)|sql)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
-        patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
+      - include: "#invalid_curl"
 
   fields_join:
     begin: \b(fields)\s*:\s*\[
@@ -542,6 +470,18 @@ repository:
       - include: "#comments"
       - include: "#fields_allow_star"
 
+  type_join:
+    match: \b(type)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.join_type.lookml
+      2:
+        patterns:
+          - name: support.constant.join_type.lookml
+            match: \b(inner|(left|full)_outer|cross)\b
+          - name: invalid.illegal.join_type.lookml
+            match: \w+
+
   relationship:
     match: \b(relationship)\s*:\s*(\w*)
     captures:
@@ -552,22 +492,10 @@ repository:
           - name: support.constant.relationship.lookml
             match: \b((one|many)_to_(one|many))\b
           - name: invalid.illegal.relationship.lookml
-            match: "[^\\s]+"
-
-  join_type:
-    match: \b(type)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.join_type.lookml
-      2:
-        patterns:
-          - name: support.constant.join_type.lookml
-            match: \b(inner|(left|full)_outer|cross)\b
-          - name: invalid.illegal.join_type.lookml
-            match: "[^\\s]+"
+            match: \w+
 
   # ------------------------------
-  # aggregation awareness
+  # Explore: aggregation awareness
   # ------------------------------
   aggregate_table:
     begin: \b(aggregate_table)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -580,9 +508,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
+      # aggregate table specific blocks
       - include: "#aggregate_table_query"
       - include: "#materialization"
-      - include: "#undefined_block"
+
+      # common blocks
+      - include: "#invalid_curl"
 
   aggregate_table_query:
     begin: \b(query)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -595,23 +527,19 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#aggregate_table_query_ident_array"
+
+      # identifier array
+      - begin: \b(?=(dimensions|measures)\s*:\s*\[)
+        end: \]
+        patterns:
+          - include: "#option_ident_array"
+
+      # common blocks
+      - include: "#filters"
       - include: "#timezone"
       - include: "#sorts"
-      - include: "#filters"
-      - include: "#undefined_block"
-
-  aggregate_table_query_ident_array:
-    begin: \b(dimensions|measures)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident"
-
-  ### materialization controls
+      - include: "#string"
+      - include: "#invalid_curl"
 
   materialization:
     begin: \b(materialization)\s*:\s*\{
@@ -621,65 +549,50 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#materialization_option_string"
-      - include: "#materialization_option_string_array"
-      - include: "#materialization_option_numeric"
-      - include: "#materialization_option_ident"
-      - include: "#materialization_option_sql"
+
+      # string
+      - match: \b(persist_for|distribution)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # string array
+      - begin: \b(cluster_keys|indexes|partition_keys|sortkeys|increment_key)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.option_string_array.lookml
+        end: \]
+        patterns:
+          - include: "#comments"
+          - include: "#string"
+
+      # numeric
+      - match: \b(increment_offset)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_numeric.lookml
+          2:
+            patterns:
+              - include: "#numeric"
+
+      # sql
+      - begin: \b(?=sql_trigger_value\s*:\s*)
+        end: ;;
+        patterns:
+          - include: "#sql_block"
+
+      # common blocks
       - include: "#distribution_style"
       - include: "#datagroup_trigger"
       - include: "#string"
-      - include: "#undefined_block"
-
-  materialization_option_string:
-    match: \b(persist_for|distribution)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  materialization_option_string_array:
-    begin: \b(cluster_keys|indexes|partition_keys|sortkeys|increment_key)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_string_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#string"
-
-  materialization_option_numeric:
-    match: \b(increment_offset)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_numeric.lookml
-      2:
-        patterns:
-          - include: "#numeric"
-
-  materialization_option_sql:
-    begin: \b(sql_trigger_value)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
-        patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # query (quick start)
+  # Explore: query (quick start)
   # ------------------------------
-  quick_start_query:
+  query_explore:
     begin: \b(query)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
@@ -690,40 +603,36 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#quick_start_query_option_string"
-      - include: "#quick_start_query_option_numeric"
-      - include: "#quick_start_query_option_ident_array"
-      - include: "#sorts"
-      - include: "#filters"
-      - include: "#string"
-      - include: "#undefined_block"
 
-  quick_start_query_option_string:
-    match: \b(label|description)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
+      # string
+      - match: \b(label|description)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
 
-  quick_start_query_option_numeric:
-    match: \b(limit)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_numeric.lookml
-      2:
+      # numeric
+      - match: \b(limit)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_numeric.lookml
+          2:
+            patterns:
+              - include: "#numeric"
+
+      # identifier array without dot
+      - begin: \b(?=(dimensions|measures|pivots)\s*:\s*\[)
+        end: \]
         patterns:
-          - include: "#numeric"
+          - include: "#option_ident_array"
 
-  quick_start_query_option_ident_array:
-    begin: \b(dimensions|measures|pivots)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident"
+      # common blocks
+      - include: "#filters"
+      - include: "#sorts"
+      - include: "#string"
+      - include: "#invalid_curl"
+
 
   # ==============================================
   # View specific parameter blocks
@@ -739,89 +648,51 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#derived_table"
-      - include: "#view_option_string"
-      - include: "#view_option_ident_no_dot_array"
-      - include: "#view_option_yesno"
-      - include: "#view_option_sql"
-      - include: "#field_def"
-      - include: "#set"
-      - include: "#drill_fields"
-      - include: "#extension"
-      - include: "#string"
-      - include: "#undefined_block"
 
-  view_option_string:
-    match: \b(label)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  view_option_ident_no_dot_array:
-    begin: \b(extends|required_access_grants)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_ident_no_dot_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#ident_no_dot"
-
-  view_option_yesno:
-    match: \b(fields_hidden_by_default|suggestions|final)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
-
-  view_option_sql:
-    begin: \b(sql_table_name)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
-        patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
-
-  # ------------------------------
-  # set, drill fields
-  # ------------------------------
-  set:
-    begin: \b(set)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
-    beginCaptures:
-      1:
-        name: keyword.control.set.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
-    end: \}
-    patterns:
-      - include: "#comments"
-      - begin: \b(fields)\s*:\s*\[
-        beginCaptures:
+      # string
+      - match: \b(label)\s*:\s*(\w*)
+        captures:
           1:
-            name: keyword.control.option_ident_no_dot_array.lookml
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # identifier array without dot
+      - begin: \b(?=(extends|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#fields_allow_star"
-      - include: "#undefined_block"
+          - include: "#option_ident_no_dot_array"
+
+      # yesno
+      - match: \b(fields_hidden_by_default|suggestions|final)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
+      # sql
+      - begin: \b(?=sql_table_name\s*:\s*)
+        end: ;;
+        patterns:
+          - include: "#sql_block"
+
+      # view specific blocks
+      - include: "#derived_table"
+      - include: "#set"
+
+      # dimension, measure, ... etc
+      - include: "#field_def"
+
+      # common blocks
+      - include: "#extension"
+      - include: "#drill_fields"
+      - include: "#string"
+      - include: "#invalid_curl"
 
   # ------------------------------
-  # derived table
+  # View: derived table
   # ------------------------------
   derived_table:
     begin: \b(derived_table)\s*:\s*\{
@@ -831,73 +702,60 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#derived_table_option_string"
-      - include: "#derived_table_option_string_array"
-      - include: "#derived_table_option_numeric"
-      - include: "#derived_table_option_yesno"
-      - include: "#derived_table_option_sql"
-      - include: "#derived_table_explore_source"
+
+      # string
+      - match: \b(persist_for|distribution|interval_trigger|increment_key)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+          2:
+            name: invalid.illegal.string.lookml
+
+      # string array
+      - begin: \b(cluster_keys|indexes|partition_keys|sortkeys)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.option_string_array.lookml
+        end: \]
+        patterns:
+          - include: "#comments"
+          - include: "#string"
+
+      # numeric
+      - match: \b(increment_offset)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_numeric.lookml
+          2:
+            patterns:
+              - include: "#numeric"
+
+      # yesno
+      - match: \b(materialized_view|publish_as_db_view)\s*:\s*(\w*)
+        captures:
+          1:
+            name: keyword.control.option_yesno.lookml
+          2:
+            patterns:
+              - include: "#yesno"
+
+      # sql
+      - begin: \b(?=sql(_trigger_value|_create)?\s*:\s*)
+        end: ;;
+        patterns:
+          - include: "#sql_block"
+
+      # explore specific blocks
+      - include: "#explore_source_derived_table"
       - include: "#table_compression"
       - include: "#table_format"
-      - include: "#datagroup_trigger"
       - include: "#create_process"
+
+      # common blocks
+      - include: "#datagroup_trigger"
       - include: "#distribution_style"
       - include: "#string"
-      - include: "#undefined_block"
-
-  derived_table_option_string:
-    match: \b(persist_for|distribution|interval_trigger|increment_key)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-      2:
-        name: invalid.illegal.string.lookml
-
-  derived_table_option_string_array:
-    begin: \b(cluster_keys|indexes|partition_keys|sortkeys)\s*:\s*\[
-    beginCaptures:
-      1:
-        name: keyword.control.option_string_array.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - include: "#string"
-
-  derived_table_option_numeric:
-    match: \b(increment_offset)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_numeric.lookml
-      2:
-        patterns:
-          - include: "#numeric"
-
-  derived_table_option_yesno:
-    match: \b(materialized_view|publish_as_db_view)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.option_yesno.lookml
-      2:
-        patterns:
-          - include: "#yesno"
-
-  derived_table_option_sql:
-    begin: \b(sql(_trigger_value|_create)?)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.sql_option.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
-        patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
+      - include: "#invalid_curl"
 
   create_process:
     begin: \b(create_process)\s*:\s*\{
@@ -908,23 +766,11 @@ repository:
     patterns:
       - include: "#comments"
       - patterns:
-          - begin: \b(sql_step)\s*:\s*
-            beginCaptures:
-              1:
-                name: keyword.control.sql_option.lookml
+          - begin: \b(?=sql_step\s*:\s*)
             end: ;;
-            endCaptures:
-              0:
-                name: punctuation.terminator.semi_semi.lookml
             patterns:
-              - begin: \G
-                end: (?=;;)
-                contentName: meta.embedded.block.sql
-                patterns:
-                  - include: "#constant_ref"
-                  - include: "#dollar_field_ref"
-                  - include: "source.sql"
-      - include: "#undefined_block"
+              - include: "#sql_block"
+      - include: "#invalid_curl"
 
   table_compression:
     match: \b(table_compression)\s*:\s*(\w*)
@@ -951,9 +797,9 @@ repository:
             match: "[^\\s]+"
 
   # ------------------------------
-  # explore source
+  # View: explore source
   # ------------------------------
-  derived_table_explore_source:
+  explore_source_derived_table:
     begin: \b(explore_source)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
@@ -964,17 +810,21 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#column"
+
+      # explore source (for view) specific blocks
       - include: "#derived_column"
-      - include: "#expression_custom_filter"
+      - include: "#bind_filters"
+      - include: "#bind_all_filters"
+
+      # common blocks
+      - include: "#column"
       - include: "#filters"
+      - include: "#expression_custom_filter"
       - include: "#sorts"
       - include: "#limit"
       - include: "#timezone"
-      - include: "#bind_filters"
-      - include: "#bind_all_filters"
       - include: "#string"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
   derived_column:
     begin: \b(derived_column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -987,23 +837,11 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - begin: \b(sql)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.sql_option.lookml
+      - begin: \b(?=sql\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.sql
-            patterns:
-              - include: "#constant_ref"
-              - include: "#dollar_field_ref"
-              - include: "source.sql"
-      - include: "#undefined_block"
+          - include: "#sql_block"
+      - include: "#invalid_curl"
 
   bind_filters:
     begin: \b(bind_filters)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
@@ -1024,7 +862,7 @@ repository:
               3:
                 patterns:
                   - include: "#ident"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
   bind_all_filters:
     match: \b(bind_all_filters)\s*:\s*(\w*)
@@ -1034,6 +872,30 @@ repository:
       2:
         patterns:
           - include: "#yesno"
+
+  # ------------------------------
+  # View: set
+  # ------------------------------
+  set:
+    begin: \b(set)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.set.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - begin: \b(fields)\s*:\s*\[
+        beginCaptures:
+          1:
+            name: keyword.control.option_ident_no_dot_array.lookml
+        end: \]
+        patterns:
+          - include: "#comments"
+          - include: "#fields_allow_star"
+      - include: "#invalid_curl"
 
 
   # ==============================================
@@ -1047,6 +909,9 @@ repository:
       - include: "#filter"
       - include: "#parameter"
 
+  # ------------------------------
+  # Field: dimension
+  # ------------------------------
   dimension:
     begin: \b(dimension)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
@@ -1058,11 +923,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       # string option
       - match: \b(view_label|label|description|group(?:_item)?_label|suggest_persist_for|value_format|fanout_on)\s*:\s*
         captures:
           1:
             name: keyword.control.option_string.lookml
+
       # string array
       - begin: \b(tags|suggestions)\s*:\s*\[
         beginCaptures:
@@ -1072,13 +939,8 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#string"
+
       # identifier without dot
-      - match: \b(suggest_explore|value_format_name|map_layer_name)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_explore|value_format_name|map_layer_name)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1086,13 +948,8 @@ repository:
           2:
             patterns:
               - include: "#ident_no_dot"
+
       # identifier with dot
-      - match: \b(suggest_dimension|label_from_parameter|(?:start|end)_location_field)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_dimension|label_from_parameter|(?:start|end)_location_field)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1100,24 +957,19 @@ repository:
           2:
             patterns:
               - include: "#ident"
+
       # identifier array (without dot)
-      - begin: \b(alias|required_access_grants)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(alias|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident_no_dot"
+          - include: "#option_ident_no_dot_array"
+
       # identifier array (with dot)
-      - begin: \b(required_fields)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(required_fields)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident"
+          - include: "#option_ident_array"
+
       # numeric array
       - begin: \b(tiers)\s*:\s*\[
         beginCaptures:
@@ -1127,39 +979,19 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#numeric"
+
       # sql
-      - begin: \b(sql|sql_(?:latitude|longitude|start|end))\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.sql_option.lookml
+      - begin: \b(?=sql|sql_(?:latitude|longitude|start|end)\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.sql
-            patterns:
-              - include: "#constant_ref"
-              - include: "#dollar_field_ref"
-              - include: "source.sql"
+          - include: "#sql_block"
+
       # html
-      - begin: \b(html)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.html.lookml
+      - begin: \b(?=html\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.html
-            patterns:
-              - include: "#constant_ref"
-              - include: "text.html.basic"
+          - include: "#html_block"
+
       # yesno
       - match: \b(hidden|can_filter|alpha_sort|case_sensitive|skip_drill_filter|bypass_suggest_restrictions|full_suggestions|convert_tz|suggestable|allow_fill|primary_key)\s*:\s*(\w*)
         captures:
@@ -1168,13 +1000,8 @@ repository:
           2:
             patterns:
               - include: "#yesno"
+
       # type
-      - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1187,13 +1014,8 @@ repository:
               - include: "#duration_type"
               - name: invalid.illegal.type.dimension.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
+
       # string data type
-      - match: \b(string_datatype)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(string_datatype)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1204,18 +1026,78 @@ repository:
                 match: \b(unicode)\b
               - name: invalid.illegal.string_datatype.dimension.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
-      # others
-      - include: "#datatype"
-      - include: "#units"
-      - include: "#drill_fields"
-      - include: "#tier_style"
+
+      # dimension specific
       - include: "#case"
+      - include: "#tier_style"
+      - include: "#units"
+
+      # common blocks for field definition
+      - include: "#datatype"
+      - include: "#order_by_field"
       - include: "#link"
       - include: "#action"
-      - include: "#order_by_field"
-      - include: "#string"
-      - include: "#undefined_block"
 
+      # common blocks
+      - include: "#drill_fields"
+      - include: "#string"
+      - include: "#invalid_curl"
+
+  case:
+    patterns:
+      - begin: \b(case)\s*:\s*\{
+        beginCaptures:
+          1:
+            name: keyword.control.case.lookml
+        end: \}
+        patterns:
+          - include: "#comments"
+          - begin: \b(when)\s*:\s*\{
+            beginCaptures:
+              1:
+                name: keyword.control.when.lookml
+            end: \}
+            patterns:
+              - include: "#comments"
+              - match: \b(label)\s*:\s*
+                captures:
+                  1:
+                    name: keyword.control.option_string.lookml
+              - begin: \b(?=sql\s*:\s*)
+                end: ;;
+                patterns:
+                  - include: "#sql_block"
+              - include: "#string"
+              - include: "#invalid_curl"
+          - include: "#invalid_curl"
+
+  tier_style:
+    match: \b(style)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.tier_style.lookml
+      2:
+        patterns:
+          - name: support.constant.tier_style.lookml
+            match: \b(classic|interval|integer|relational)\b
+          - name: invalid.illegal.tier_style.lookml
+            match: \w+
+
+  units:
+    match: \b(units)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.units.lookml
+      2:
+        patterns:
+          - name: support.constant.units.lookml
+            match: \b(feet|kilometers|meters|miles|nautical_miles|yards)\b
+          - name: invalid.illegal.units.lookml
+            match: "[^\\s]+"
+
+  # ------------------------------
+  # Field: dimension group
+  # ------------------------------
   dimension_group:
     begin: \b(dimension_group)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
@@ -1227,11 +1109,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       # string option
       - match: \b(view_label|label|description|group(?:_item)?_label|fanout_on)\s*:\s*
         captures:
           1:
             name: keyword.control.option_string.lookml
+
       # string array
       - begin: \b(tags)\s*:\s*\[
         beginCaptures:
@@ -1241,13 +1125,8 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#string"
+
       # identifier without dot
-      - match: \b(suggest_explore)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_explore)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1255,13 +1134,8 @@ repository:
           2:
             patterns:
               - include: "#ident_no_dot"
+
       # identifier with dot
-      - match: \b(suggest_dimension)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_dimension)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1269,48 +1143,25 @@ repository:
           2:
             patterns:
               - include: "#ident"
+
       # identifier array (without dot)
-      - begin: \b(alias|required_access_grants)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(alias|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident_no_dot"
+          - include: "#option_ident_no_dot_array"
+
       # sql
-      - begin: \b(sql|sql_(?:start|end))\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.sql_option.lookml
+      - begin: \b(?=sql|sql_(?:start|end)\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.sql
-            patterns:
-              - include: "#constant_ref"
-              - include: "#dollar_field_ref"
-              - include: "source.sql"
+          - include: "#sql_block"
+
       # html
-      - begin: \b(html)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.html.lookml
+      - begin: \b(?=html\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.html
-            patterns:
-              - include: "#constant_ref"
-              - include: "text.html.basic"
+          - include: "#html_block"
+
       # yesno
       - match: \b(hidden|can_filter|bypass_suggest_restrictions|full_suggestions|convert_tz|suggestable|allow_fill)\s*:\s*(\w*)
         captures:
@@ -1319,13 +1170,8 @@ repository:
           2:
             patterns:
               - include: "#yesno"
+
       # type
-      - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1336,15 +1182,25 @@ repository:
                 match: \b(time|duration)\b
               - name: invalid.illegal.type.dimension.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
-      # others
-      - include: "#datatype"
+
+      # common blocks for fields
+      - include: "#order_by_field"
+
+      # dimension group specific blocks
       - include: "#timeframes"
       - include: "#intervals"
-      - include: "#drill_fields"
-      - include: "#order_by_field"
-      - include: "#string"
-      - include: "#undefined_block"
 
+      # common blocks for field definition
+      - include: "#datatype"
+
+      # common blocks
+      - include: "#drill_fields"
+      - include: "#string"
+      - include: "#invalid_curl"
+
+  # ------------------------------
+  # Field: measure
+  # ------------------------------
   measure:
     begin: \b(measure)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
@@ -1356,11 +1212,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       # string option
       - match: \b(view_label|label|description|group(?:_item)?_label|value_format|fanout_on)\s*:\s*
         captures:
           1:
             name: keyword.control.option_string.lookml
+
       # string array
       - begin: \b(tags)\s*:\s*\[
         beginCaptures:
@@ -1370,13 +1228,8 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#string"
+
       # identifier without dot
-      - match: \b(suggest_explore|value_format_name)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_explore|value_format_name)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1384,13 +1237,8 @@ repository:
           2:
             patterns:
               - include: "#ident_no_dot"
+
       # identifier with dot
-      - match: \b(suggest_dimension|label_from_parameter|list_field)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_dimension|label_from_parameter|list_field)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1398,24 +1246,19 @@ repository:
           2:
             patterns:
               - include: "#ident"
+
       # identifier array (without dot)
-      - begin: \b(alias|required_access_grants)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(alias|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident_no_dot"
+          - include: "#option_ident_no_dot_array"
+
       # identifier array (with dot)
-      - begin: \b(required_fields)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(required_fields)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident"
+          - include: "#option_ident_array"
+
       # numeric
       - match: \b(approximate_threshold|precision|percentile)\s*:\s*(\w*)
         captures:
@@ -1424,6 +1267,7 @@ repository:
           2:
             patterns:
               - include: "#numeric"
+
       # yesno
       - match: \b(hidden|can_filter|approximate|allow_approximate_optimization|convert_tz|suggestable)\s*:\s*(\w*)
         captures:
@@ -1432,39 +1276,19 @@ repository:
           2:
             patterns:
               - include: "#yesno"
+
       # sql
-      - begin: \b(sql|sql_distinct_key)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.sql_option.lookml
+      - begin: \b(?=sql|sql_distinct_key\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.sql
-            patterns:
-              - include: "#constant_ref"
-              - include: "#dollar_field_ref"
-              - include: "source.sql"
+          - include: "#sql_block"
+
       # html
-      - begin: \b(html)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.html.lookml
+      - begin: \b(?=html\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.html
-            patterns:
-              - include: "#constant_ref"
-              - include: "text.html.basic"
+          - include: "#html_block"
+
       # direction
       - match: \b(direction)\s*:\s*(\"[^"]*\")?
         captures:
@@ -1476,13 +1300,8 @@ repository:
                 match: \"(row|column)\"
               - name: invalid.illegal.direction.lookml
                 match: "[^\"]+"
+
       # type
-      - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1493,16 +1312,22 @@ repository:
                 match: \b((:?(:?average|count|median|percentile|sum)(:?_distinct)?)|percent_of_(:?previous|total)|running_total|date|list|max|min|number|string|yesno|int)\b
               - name: invalid.illegal.type.measure.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
-      # others
+
+      # common blocks for field definition
       - include: "#datatype"
-      - include: "#drill_fields"
       - include: "#link"
       - include: "#action"
-      - include: "#filters"
       - include: "#order_by_field"
-      - include: "#string"
-      - include: "#undefined_block"
 
+      # common blocks
+      - include: "#filters"
+      - include: "#drill_fields"
+      - include: "#string"
+      - include: "#invalid_curl"
+
+  # ------------------------------
+  # Field: filter
+  # ------------------------------
   filter:
     begin: \b(filter)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
@@ -1514,11 +1339,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       # string option
       - match: \b(view_label|label|description|group(?:_item)?_label|suggest_persist_for|default_value)\s*:\s*
         captures:
           1:
             name: keyword.control.option_string.lookml
+
       # string array
       - begin: \b(tags|suggestions)\s*:\s*\[
         beginCaptures:
@@ -1528,13 +1355,8 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#string"
+
       # identifier without dot
-      - match: \b(suggest_explore)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_explore)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1542,13 +1364,8 @@ repository:
           2:
             patterns:
               - include: "#ident_no_dot"
+
       # identifier with dot
-      - match: \b(suggest_dimension)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_dimension)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1556,32 +1373,19 @@ repository:
           2:
             patterns:
               - include: "#ident"
+
       # identifier array (without dot)
-      - begin: \b(alias|required_access_grants)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(alias|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident_no_dot"
+          - include: "#option_ident_no_dot_array"
+
       # sql
-      - begin: \b(sql)\s*:\s*
-        beginCaptures:
-          1:
-            name: keyword.control.sql_option.lookml
+      - begin: \b(?=sql\s*:\s*)
         end: ;;
-        endCaptures:
-          0:
-            name: punctuation.terminator.semi_semi.lookml
         patterns:
-          - begin: \G
-            end: (?=;;)
-            contentName: meta.embedded.block.sql
-            patterns:
-              - include: "#constant_ref"
-              - include: "#dollar_field_ref"
-              - include: "source.sql"
+          - include: "#sql_block"
+
       # yesno
       - match: \b(hidden|case_sensitive|bypass_suggest_restrictions|full_suggestions|convert_tz|suggestable)\s*:\s*(\w*)
         captures:
@@ -1590,13 +1394,8 @@ repository:
           2:
             patterns:
               - include: "#yesno"
+
       # type
-      - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1608,11 +1407,17 @@ repository:
               - include: "#time_type"
               - name: invalid.illegal.type.dimension.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
-      # others
-      - include: "#datatype"
-      - include: "#string"
-      - include: "#undefined_block"
 
+      # common blocks for field definition
+      - include: "#datatype"
+
+      # common blocks
+      - include: "#string"
+      - include: "#invalid_curl"
+
+  # ------------------------------
+  # Field: parameter
+  # ------------------------------
   parameter:
     begin: \b(parameter)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
@@ -1624,11 +1429,13 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       # string option
       - match: \b(view_label|label|description|suggest_persist_for|default_value)\s*:\s*
         captures:
           1:
             name: keyword.control.option_string.lookml
+
       # string array
       - begin: \b(tags|suggestions)\s*:\s*\[
         beginCaptures:
@@ -1638,13 +1445,8 @@ repository:
         patterns:
           - include: "#comments"
           - include: "#string"
+
       # identifier without dot
-      - match: \b(suggest_explore)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_explore)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1652,13 +1454,8 @@ repository:
           2:
             patterns:
               - include: "#ident_no_dot"
+
       # identifier with dot
-      - match: \b(suggest_dimension)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(suggest_dimension)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1666,15 +1463,13 @@ repository:
           2:
             patterns:
               - include: "#ident"
+
       # identifier array (without dot)
-      - begin: \b(alias|required_access_grants)\s*:\s*\[
-        beginCaptures:
-          1:
-            name: keyword.control.option_ident_array.lookml
+      - begin: \b(?=(alias|required_access_grants)\s*:\s*\[)
         end: \]
         patterns:
-          - include: "#comments"
-          - include: "#ident_no_dot"
+          - include: "#option_ident_no_dot_array"
+
       # yesno
       - match: \b(hidden|bypass_suggest_restrictions|full_suggestions|convert_tz|suggestable)\s*:\s*(\w*)
         captures:
@@ -1683,13 +1478,8 @@ repository:
           2:
             patterns:
               - include: "#yesno"
+
       # type
-      - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1700,14 +1490,32 @@ repository:
                 match: \b(date(?:_time)?|number|string|unquoted|yesno)\b
               - name: invalid.illegal.type.dimension.lookml
                 match: "[A-Za-z0-9_$@*.-]+"
-      # other
+
+      # parameter specific block
       - include: "#allowed_value"
+
+      # common blocks
       - include: "#string"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
+
+  allowed_value:
+    begin: \b(allowed_value)\s*:\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.allowed_value.lookml
+    end: \}
+    patterns:
+      - include: "#comments"
+      - match: \b(label|value)\s*:\s*
+        captures:
+          1:
+            name: keyword.control.option_string.lookml
+      - include: "#string"
+      - include: "#invalid_curl"
 
 
   # ------------------------------
-  # timeframe
+  # Filed (common): timeframe & time
   # ------------------------------
   timeframes:
     begin: \b(timeframes)\s*:\s*\[
@@ -1717,8 +1525,7 @@ repository:
     end: \]
     patterns:
       - include: "#comments"
-      - name: invalid.illegal.timeframe.lookml
-        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
+      # special
       - name: support.constant.timeframe.lookml
         match: \b(raw|yesno)\b
       # year
@@ -1750,6 +1557,7 @@ repository:
       # invalid
       - name: invalid.illegal.timeframe.lookml
         match: "[A-Za-z0-9_$@*.-]+"
+      - include: "#invalid_curl"
 
   time_type:
     patterns:
@@ -1785,7 +1593,9 @@ repository:
       - name: support.constant.timeframe.lookml
         match: \bdate_(millisecond(2|4|5|8|10|20|25|40|50|100|125|200|250|500))\b
 
-
+  # ------------------------------
+  # Filed (common): interval & duration
+  # ------------------------------
   intervals:
     begin: \b(intervals)\s*:\s*\[
     beginCaptures:
@@ -1794,21 +1604,21 @@ repository:
     end: \]
     patterns:
       - include: "#comments"
-      - name: invalid.illegal.timeframe.lookml
-        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
       - match: \b(day|hour|minute|month|quarter|second|week|year)\b
         captures:
           1:
             name: support.constant.interval.lookml
+      # invalid
       - name: invalid.illegal.timeframe.lookml
         match: "[A-Za-z0-9_$@*.-]+"
+      - include: "#invalid_curl"
 
   duration_type:
     name: support.constant.duration.lookml
     match: \bduration_(day|hour|minute|month|quarter|second|week|year)\b
 
   # ------------------------------
-  # other field options
+  # Filed (common): data type
   # ------------------------------
   datatype:
     match: \b(datatype)\s*:\s*(\w*)
@@ -1822,58 +1632,9 @@ repository:
           - name: invalid.illegal.datatype.lookml
             match: "[^\\s]+"
 
-  units:
-    match: \b(units)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.units.lookml
-      2:
-        patterns:
-          - name: support.constant.units.lookml
-            match: \b(feet|kilometers|meters|miles|nautical_miles|yards)\b
-          - name: invalid.illegal.units.lookml
-            match: "[^\\s]+"
-
-  case:
-    patterns:
-      - begin: \b(case)\s*:\s*\{
-        beginCaptures:
-          1:
-            name: keyword.control.case.lookml
-        end: \}
-        patterns:
-          - include: "#comments"
-          - begin: \b(when)\s*:\s*\{
-            beginCaptures:
-              1:
-                name: keyword.control.when.lookml
-            end: \}
-            patterns:
-              - include: "#comments"
-              - match: \b(label)\s*:\s*
-                captures:
-                  1:
-                    name: keyword.control.option_string.lookml
-              - begin: \b(sql)\s*:\s*
-                beginCaptures:
-                  1:
-                    name: keyword.control.sql_option.lookml
-                end: ;;
-                endCaptures:
-                  0:
-                    name: punctuation.terminator.semi_semi.lookml
-                patterns:
-                  - begin: \G
-                    end: (?=;;)
-                    contentName: meta.embedded.block.sql
-                    patterns:
-                      - include: "#constant_ref"
-                      - include: "#dollar_field_ref"
-                      - include: "source.sql"
-              - include: "#string"
-              - include: "#undefined_block"
-          - include: "#undefined_block"
-
+  # ------------------------------
+  # Filed (common): action
+  # ------------------------------
   action:
     patterns:
       - begin: \b(action)\s*:\s*\{
@@ -1902,7 +1663,7 @@ repository:
                   1:
                     name: keyword.control.option_string.lookml
               - include: "#string"
-              - include: "#undefined_block"
+              - include: "#invalid_curl"
           # form_param
           - begin: \b(form_param)\s*:\s*\{
             beginCaptures:
@@ -1938,14 +1699,8 @@ repository:
                       1:
                         name: keyword.control.option_string.lookml
                   - include: "#string"
-                  - include: "#undefined_block"
+                  - include: "#invalid_curl"
               # type
-              - match: \b(type)\s*:\s*([$@]\{[A-Za-z0-9_$@*.-]*\})
-                captures:
-                  1:
-                    name: keyword.control.option_ident.lookml
-                  2:
-                    name: invalid.illegal.ident.lookml
               - match: \b(type)\s*:\s*([A-Za-z0-9_$@*.-]*)
                 captures:
                   1:
@@ -1957,10 +1712,13 @@ repository:
                       - name: invalid.illegal.type.action.lookml
                         match: "[A-Za-z0-9_$@*.-]+"
               - include: "#string"
-              - include: "#undefined_block"
+              - include: "#invalid_curl"
           - include: "#string"
-          - include: "#undefined_block"
+          - include: "#invalid_curl"
 
+  # ------------------------------
+  # Filed (common): link
+  # ------------------------------
   link:
     begin: \b(link)\s*:\s*\{
     beginCaptures:
@@ -1974,16 +1732,13 @@ repository:
           1:
             name: keyword.control.option_string.lookml
       - include: "#string"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
+  # ------------------------------
+  # Filed (common): order by field
+  # ------------------------------
   order_by_field:
     patterns:
-      - match: \b(order_by_field)\s*:\s*([$@]\{[A-Za-z0-9_$@*.]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(order_by_field)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -1991,33 +1746,6 @@ repository:
           2:
             patterns:
               - include: "#ident"
-
-  tier_style:
-    match: \b(style)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.tier_style.lookml
-      2:
-        patterns:
-          - name: support.constant.tier_style.lookml
-            match: \b(classic|interval|integer|relational)\b
-          - name: invalid.illegal.tier_style.lookml
-            match: "[^\\s]+"
-
-  allowed_value:
-    begin: \b(allowed_value)\s*:\s*\{
-    beginCaptures:
-      1:
-        name: keyword.control.allowed_value.lookml
-    end: \}
-    patterns:
-      - include: "#comments"
-      - match: \b(label|value)\s*:\s*
-        captures:
-          1:
-            name: keyword.control.option_string.lookml
-      - include: "#string"
-      - include: "#undefined_block"
 
 
   # ==============================================
@@ -2034,14 +1762,14 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#test_explore_source"
+      - include: "#explore_source_test"
       - include: "#assert"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
   # ------------------------------
   # explore source
   # ------------------------------
-  test_explore_source:
+  explore_source_test:
     begin: \b(explore_source)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
     beginCaptures:
       1:
@@ -2052,14 +1780,15 @@ repository:
     end: \}
     patterns:
       - include: "#comments"
+
       - include: "#column"
-      - include: "#expression_custom_filter"
       - include: "#filters"
+      - include: "#expression_custom_filter"
       - include: "#sorts"
       - include: "#limit"
       - include: "#timezone"
       - include: "#string"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
   # ------------------------------
   # assert
@@ -2076,7 +1805,7 @@ repository:
     patterns:
       - include: "#comments"
       - include: "#expression"
-      - include: "#undefined_block"
+      - include: "#invalid_curl"
 
   expression:
     begin: \b(expression)\s*:\s*
@@ -2095,18 +1824,11 @@ repository:
   # ==============================================
   # common blocks
   # ==============================================
-  comments:
-    name: comment.line.hash.lookml
-    match: "#.*"
-
+  # ------------------------------
+  # filed definition
+  # ------------------------------
   field:
     patterns:
-      - match: \b(field)\s*:\s*([$@]\{[A-Za-z0-9_$@*.]*\})
-        captures:
-          1:
-            name: keyword.control.option_ident.lookml
-          2:
-            name: invalid.illegal.ident.lookml
       - match: \b(field)\s*:\s*([A-Za-z0-9_$@*.-]*)
         captures:
           1:
@@ -2147,6 +1869,37 @@ repository:
       - name: invalid.illegal.ident.lookml
         match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){2,}"
 
+  # ------------------------------
+  # query definition
+  # ------------------------------
+  column:
+    begin: \b(column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
+    beginCaptures:
+      1:
+        name: keyword.control.column.lookml
+      2:
+        patterns:
+          - include: "#ident_no_dot"
+    end: \}
+    patterns:
+      - include: "#comments"
+      - include: "#field"
+      - include: "#invalid_curl"
+
+  sorts:
+    begin: \b(sorts)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.sorts.lookml
+    end: \]
+    patterns:
+      - include: "#comments"
+      - match: :\s*\b(asc|desc)\b
+        captures:
+          1:
+            name: support.constant.sort.lookml
+      - include: "#ident"
+
   filters:
     begin: \b(filters)\s*:\s*\[
     beginCaptures:
@@ -2157,9 +1910,31 @@ repository:
       - include: "#comments"
       - include: "#ident"
       - include: "#string"
+      - include: "#invalid_curl"
+
+  expression_custom_filter:
+    begin: \b(?=expression_custom_filter\s*:\s*)
+    end: ;;
+    patterns:
+      - include: "#sql_block"
+
+  limit:
+    match: \b(limit)\s*:\s*(\w*)
+    captures:
+      1:
+        name: keyword.control.option_numeric.lookml
+      2:
+        patterns:
+          - include: "#numeric"
+
+  timezone:
+    match: \b(timezone)\s*:\s*
+    captures:
+      1:
+        name: keyword.control.option_string.lookml
 
   # ------------------------------
-  # references
+  # object references
   # ------------------------------
   constant_ref:
     name: variable.parameter.constant.lookml
@@ -2176,62 +1951,28 @@ repository:
         match: \$\{[A-Za-z0-9_]*(\.[A-Za-z0-9_]*)?\}
 
   # ------------------------------
-  # query, explore source
+  # materialization / cache
   # ------------------------------
-  sorts:
-    begin: \b(sorts)\s*:\s*\[
-    beginCaptures:
+  datagroup_trigger:
+    match: \b(datagroup_trigger)\s*:\s*([A-Za-z0-9_$@*.-]*)
+    captures:
       1:
-        name: keyword.control.sorts.lookml
-    end: \]
-    patterns:
-      - include: "#comments"
-      - match: :\s*\b(asc|desc)\b
-        captures:
-          1:
-            name: support.constant.sort.lookml
-      - include: "#ident"
-
-  column:
-    begin: \b(column)\s*:\s*([A-Za-z0-9_$@*.-]*)\s*\{
-    beginCaptures:
-      1:
-        name: keyword.control.column.lookml
+        name: keyword.control.option_ident.lookml
       2:
         patterns:
           - include: "#ident_no_dot"
-    end: \}
-    patterns:
-      - include: "#comments"
-      - include: "#field"
-      - include: "#undefined_block"
 
-  expression_custom_filter:
-    begin: \b(expression_custom_filter)\s*:\s*
-    beginCaptures:
-      1:
-        name: keyword.control.expression_custom_filter.lookml
-    end: ;;
-    endCaptures:
-      0:
-        name: punctuation.terminator.semi_semi.lookml
-    patterns:
-      - begin: \G
-        end: (?=;;)
-        contentName: meta.embedded.block.sql
-        patterns:
-          - include: "#constant_ref"
-          - include: "#dollar_field_ref"
-          - include: "source.sql"
-
-  limit:
-    match: \b(limit)\s*:\s*(\w*)
+  distribution_style:
+    match: \b(distribution_style)\s*:\s*(\w*)
     captures:
       1:
-        name: keyword.control.option_numeric.lookml
+        name: keyword.control.format.lookml
       2:
         patterns:
-          - include: "#numeric"
+          - name: support.constant.distribution_style.lookml
+            match: \b(all|even)\b
+          - name: invalid.illegal.distribution_style.lookml
+            match: "[^\\s]+"
 
   # ------------------------------
   # other
@@ -2246,7 +1987,7 @@ repository:
           - name: support.constant.day.lookml
             match: \b(required)\b
           - name: invalid.illegal.day.lookml
-            match: "[^\\s]+"
+            match: \w+
 
   drill_fields:
     begin: \b(drill_fields)\s*:\s*\[
@@ -2258,36 +1999,10 @@ repository:
       - include: "#comments"
       - include: "#fields_allow_star"
 
-  datagroup_trigger:
-    match: \b(datagroup_trigger)\s*:\s*([A-Za-z0-9_$@*.-]*)
-    captures:
-      1:
-        name: keyword.control.option_ident.lookml
-      2:
-        patterns:
-          - include: "#ident_no_dot"
 
-  timezone:
-    match: \b(timezone)\s*:\s*
-    captures:
-      1:
-        name: keyword.control.option_string.lookml
-
-  distribution_style:
-    match: \b(distribution_style)\s*:\s*(\w*)
-    captures:
-      1:
-        name: keyword.control.format.lookml
-      2:
-        patterns:
-          - name: support.constant.distribution_style.lookml
-            match: \b(all|even)\b
-          - name: invalid.illegal.distribution_style.lookml
-            match: "[^\\s]+"
-
-  # ==============================================
-  # utility
-  # ==============================================
+  # ------------------------------
+  # single line option
+  # ------------------------------
   string:
     name: string.quoted.double.lookml
     begin: \"
@@ -2311,18 +2026,6 @@ repository:
       - name: invalid.illegal.numeric.lookml
         match: '[A-Za-z0-9_$@*.-]+'
 
-  ident_no_dot:
-    patterns:
-      # object reference
-      - name: invalid.illegal.ident.lookml
-        match: "[$@]\\{[A-Za-z0-9_$@*.-]*\\}"
-      # invalid character
-      - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_$@*.-]*[$@*-][A-Za-z0-9_$@*.-]*"
-      # has dot
-      - name: invalid.illegal.ident.lookml
-        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){1,}"
-
   ident:
     patterns:
       - name: invalid.illegal.ident.lookml
@@ -2334,9 +2037,80 @@ repository:
       - name: invalid.illegal.ident.lookml
         match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){2,}"
 
-  undefined_block:
+  ident_no_dot:
+    patterns:
+      # invalid character
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*[$@*-][A-Za-z0-9_$@*.-]*"
+      # has dot
+      - name: invalid.illegal.ident.lookml
+        match: "[A-Za-z0-9_$@*.-]*(\\.[A-Za-z0-9_$@*.-]*){1,}"
+
+  # ------------------------------
+  # multi line option
+  # ------------------------------
+  sql_block:
+    begin: "\\b([A-Za-z0-9_]+)\\s*:"
+    beginCaptures:
+      1:
+        name: keyword.control.sql_option.lookml
+    end: (?=;;)
+    contentName: meta.embedded.block.sql
+    patterns:
+      - include: "#constant_ref"
+      - include: "#dollar_field_ref"
+      - include: source.sql
+
+  html_block:
+    begin: "\\b([A-Za-z0-9_]+)\\s*:"
+    beginCaptures:
+      1:
+        name: keyword.control.html_option.lookml
+    end: (?=;;)
+    contentName: meta.embedded.block.html
+    patterns:
+      - include: "#constant_ref"
+      - include: text.html.basic
+
+  option_ident_array:
+    begin: \b([A-Za-z0-9_]+)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_array.lookml
+    end: (?=\])
+    patterns:
+      - include: "#comments"
+      - include: "#ident"
+      - include: "#invalid_curl"
+
+  option_ident_no_dot_array:
+    begin: \b([A-Za-z0-9_]+)\s*:\s*\[
+    beginCaptures:
+      1:
+        name: keyword.control.option_ident_array.lookml
+    end: (?=\])
+    patterns:
+      - include: "#comments"
+      - include: "#ident_no_dot"
+      - include: "#invalid_curl"
+
+  # ------------------------------
+  # generic context
+  # ------------------------------
+  comments:
+    name: comment.line.hash.lookml
+    match: "#.*"
+
+  invalid_curl:
+    patterns:
+      - name: invalid.illegal.object_reference.lookml
+        match: "[$@]\\{[A-Za-z0-9_$@.*-]*\\}"
+      - include: "#_undefined_block"
+
+  _undefined_block:
+    name: invalid.illegal.curly_block.lookml
     begin: \{
     end: \}
     patterns:
       - include: "#comments"
-      - include: "#undefined_block"
+      - include: "#_undefined_block"
