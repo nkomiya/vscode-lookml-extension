@@ -9,10 +9,10 @@ function compile(dirname) {
   const outDir = path.join(OUT, dirname);
   fs.mkdirSync(outDir, { recursive: true });
 
-  fs.copyFileSync(
-    path.join(__dirname, dirname, "config.json"),
-    path.join(outDir, "config.json")
-  );
+  const config = path.join(__dirname, dirname, "config.json");
+  if (fs.existsSync(config)) {
+    fs.copyFileSync(config, path.join(outDir, "config.json"));
+  }
 
   glob(`${dirname}/*.yaml`, (e, files) => {
     if (e) throw e;
@@ -25,3 +25,4 @@ function compile(dirname) {
 }
 
 compile("lookml");
+compile("liquid");
