@@ -5,7 +5,7 @@
 1. download VISX file
 
     ```bash
-    curl -sSO https://github.com/nkomiya/test/releases/download/v0.1.0/vscode-lookml-extension-0.0.1.vsix
+    curl -OL https://github.com/nkomiya/vscode-lookml-extension/releases/download/v0.0.1/vscode-lookml-extension-0.0.1.vsix
     ```
 
 2. install extension
