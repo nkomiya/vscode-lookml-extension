@@ -2008,6 +2008,7 @@ repository:
     begin: \"
     end: \"
     patterns:
+      - include: "#liquid_block"
       - include: "#constant_ref"
       - name: constant.character.escape.lookml
         match: \\.
@@ -2057,6 +2058,7 @@ repository:
     end: (?=;;)
     contentName: meta.embedded.block.sql
     patterns:
+      - include: "#liquid_block"
       - include: "#constant_ref"
       - include: "#dollar_field_ref"
       - include: source.sql
@@ -2069,8 +2071,22 @@ repository:
     end: (?=;;)
     contentName: meta.embedded.block.html
     patterns:
+      - include: "#liquid_block"
       - include: "#constant_ref"
       - include: text.html.basic
+
+  liquid_block:
+    patterns:
+      - name: meta.embedded.block.liquid
+        begin: (?=\{\%)
+        end: (?<=\%\})
+        patterns:
+          - include: source.liquid.lookml
+      - name: meta.embedded.block.liquid
+        begin: (?=\{\{)
+        end: (?<=\}\})
+        patterns:
+          - include: source.liquid.lookml
 
   option_ident_array:
     begin: \b([A-Za-z0-9_]+)\s*:\s*\[

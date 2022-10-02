@@ -42,6 +42,9 @@
           ".model"
         ],
         "configuration": "./dist/syntaxes/lookml/config.json"
+      },
+      {
+        "id": "liquid.lookml"
       }
     ],
     "grammars": [
@@ -58,6 +61,11 @@
           "meta.embedded.block.html": "html",
           "meta.embedded.block.sql": "sql"
         }
+      },
+      {
+        "language": "liquid.lookml",
+        "scopeName": "source.liquid.lookml",
+        "path": "./dist/syntaxes/liquid/liquid.json"
       }
     ]
   },

@@ -1,0 +1,195 @@
+scopeName: source.liquid.lookml
+
+patterns:
+  - include: "#comments"
+  - include: "#output"
+  - include: "#tag"
+
+repository:
+  # ==============================================
+  # output
+  # ==============================================
+  output:
+    begin: \{\{(-)?
+    beginCaptures:
+      1:
+        name: keyword.control.whitespace.liquid.lookml
+    end: (-)?\}\}
+    endCaptures:
+      1:
+        name: keyword.control.whitespace.liquid.lookml
+    patterns:
+      - include: "#string"
+      - include: "#numeric"
+      - include: "#constant"
+      - include: "#object"
+      - include: "#filter"
+
+  # ==============================================
+  # tag
+  # ==============================================
+  tag:
+    patterns:
+      - include: "#tag_condition"
+      - include: "#tag_looker"
+      - include: "#tag_without_args"
+
+  tag_condition:
+    name: meta.block.tag.liquid.lookml
+    begin: ({%)(-)?\s*((?:(?:els)?if)|unless|case|when)
+    beginCaptures:
+      1:
+        name: keyword.control.tag.liquid.lookml
+      2:
+        name: keyword.control.whitespace.liquid.lookml
+      3:
+        name: keyword.control.tag.liquid.lookml
+    end: (-)?(%})
+    endCaptures:
+      1:
+        name: keyword.control.whitespace.liquid.lookml
+      2:
+        name: keyword.control.tag.liquid.lookml
+    patterns:
+      - include: "#operator"
+      - include: "#string"
+      - include: "#numeric"
+      - include: "#constant"
+      - include: "#object"
+
+  tag_looker:
+    begin: ({%)(-)?\s*(date_(?:start|end)|parameter|condition)
+    beginCaptures:
+      1:
+        name: keyword.control.tag.liquid.lookml
+      2:
+        name: keyword.control.whitespace.liquid.lookml
+      3:
+        name: keyword.control.tag.liquid.lookml
+    end: (-)?(%})
+    endCaptures:
+      1:
+        name: keyword.control.whitespace.liquid.lookml
+      2:
+        name: keyword.control.tag.liquid.lookml
+
+  tag_without_args:
+    begin: ({%)(-)?\s*([A-Za-z0-9_]*)
+    beginCaptures:
+      1:
+        name: keyword.control.tag.liquid.lookml
+      2:
+        name: keyword.control.whitespace.liquid.lookml
+      3:
+        patterns:
+          - name: keyword.control.tag.liquid.lookml
+            match: \b(end(if|raw|unless|case|condition))\b
+          - name: keyword.control.tag.liquid.lookml
+            match: \b(else)\b
+    end: (-)?(%})
+    endCaptures:
+      1:
+        name: keyword.control.whitespace.liquid.lookml
+      2:
+        name: keyword.control.tag.liquid.lookml
+
+
+  # ==============================================
+  # fragments
+  # ==============================================
+  filter:
+    match: \|\s*([A-Za-z0-9_]+)\s*:?\b
+    captures:
+      1:
+        patterns:
+          - name: support.function.liquid.lookml
+            match: \b(?:default|at_(most|least))\b
+          - name: support.function.liquid.lookml
+            match: \b(?:plus|minus|times|divided_by|modulo|round|abs|ceil|floor)\b
+          - name: support.function.liquid.lookml
+            match: \b(?:date|capitalize|(up|down)case|escape(_once)?|replace(_first)?|truncate(words)?|url_(encode|decode)|split|size|reverse|newline_to_br|(l|r)?strip|strip_(html|newlines))\b
+          - name: support.function.liquid.lookml
+            match: \b(?:append|prepend|concat|remove(_first)?|compact|first|last|map|join|sort(_natural)?|slice|uniq|where)\b
+
+  operator:
+    patterns:
+      # binary
+      - name: keyword.control.binary_op.liquid.lookml
+        match: \s+(==|!=|>=?|<=?|and|or)\s+
+
+  object:
+    patterns:
+      # defined scalar objects
+      - match: \b([A-Za-z0-9_.]+)(?!\s*\[)\b
+        captures:
+          1:
+            patterns:
+              # value
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\.(_))?((?:rendered_|filterable_)?value)(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+                  2:
+                    name: support.constant.defined-object.liquid.lookml
+              # link
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\.(_))?(link|linked_value)(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+                  2:
+                    name: support.constant.defined-object.liquid.lookml
+              # name reference
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\.)?(_(model|explore|view|field)\._name)(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+              # query timezone
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\.)?(_query\._query_timezone)(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+              # in query
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\.(_in_query))(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+              # field attributes
+              - match: \b(?<!\.\s*)(?:[A-Za-z0-9_]+\.[A-Za-z0-9_]+?\.(_is_(?:selected|filtered)|_parameter_value))(?!\s*\.)\b
+                captures:
+                  1:
+                    name: support.constant.defined-object.liquid.lookml
+      # defined subscriptable objects
+      - begin: \b(?<!\.\s*)(_filters|_user_attributes|_localization)\s*\[
+        beginCaptures:
+          1:
+            name: support.constant.defined-object.liquid.lookml
+        end: \]
+        patterns:
+        - include: "#string"
+        - name: invalid.illegal.subscription.liquid.lookml
+          match: \w+
+
+  string:
+    patterns:
+      - name: string.quoted.single.liquid.lookml
+        begin: "'"
+        end: "'"
+      - name: string.quoted.double.liquid.lookml
+        begin: \"
+        end: \"
+
+  numeric:
+    name: constant.numeric.liquid.lookml
+    match: (?<=^|[{%=\s\[<>])\d+(\.\d*)?(?=$|[%}=\s\]!<>])
+
+  constant:
+    name: constant.language.liquid.lookml
+    match: (?<=^|[{%=\s\[<>])(false|true|nil|null|empty|blank)(?=$|[%}=\s\]!<>])
+
+  # ------------------------------
+  # generic context
+  # ------------------------------
+  comments:
+    name: comment.block.liquid.lookml
+    begin: \{\%-?\s*(comment)\s*-?\%\}
+    end: \{\%-?\s*(endcomment)\s*-?\%\}
