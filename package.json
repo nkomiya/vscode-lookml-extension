@@ -73,16 +73,24 @@
     "compile:syntaxes": "yarn workspace syntaxes compile",
     "compile": "yarn compile:syntaxes",
     "watch:syntaxes": "yarn workspace syntaxes watch",
+    "package": "yarn compile && yarn vsce package",
     "watch": "tsc -b -w"
   },
   "devDependencies": {
     "@types/node": "16.x",
     "@types/vscode": "^1.71.0",
+    "standard-version": "^9.5.0",
     "typescript": "^4.7.4",
     "vsce": "^2.11.0"
   },
   "workspaces": [
     "packages/syntaxes"
   ],
+  "standard-version": {
+    "skip": {
+      "commit": true,
+      "tag": true
+    }
+  },
   "private": true
 }
